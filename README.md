@@ -29,6 +29,21 @@
 - **Modern UI**: Clean, intuitive interface with smooth animations
 - **Typography**: Plus Jakarta Sans
 
+## Screenshots
+
+<p align="center">
+  <img src="screenshoots/Screenshot_20251223-182621_Euphoriae.png" width="200" alt="Home Screen"/>
+  <img src="screenshoots/Screenshot_20251223-182627_Euphoriae.png" width="200" alt="Songs List"/>
+  <img src="screenshoots/Screenshot_20251223-182635_Euphoriae.png" width="200" alt="Playlists"/>
+  <img src="screenshoots/Screenshot_20251223-182638_Euphoriae.png" width="200" alt="Equalizer"/>
+</p>
+
+<p align="center">
+  <img src="screenshoots/Screenshot_20251223-182639_Euphoriae.png" width="200" alt="Now Playing"/>
+  <img src="screenshoots/Screenshot_20251223-182642_Euphoriae.png" width="200" alt="Now Playing 2"/>
+  <img src="screenshoots/Screenshot_20251223-182644_Euphoriae.png" width="200" alt="Settings"/>
+</p>
+
 ## Tech Stack
 
 | Category | Technology |
