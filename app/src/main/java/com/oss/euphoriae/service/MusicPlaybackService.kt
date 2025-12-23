@@ -1,8 +1,11 @@
 package com.oss.euphoriae.service
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -21,10 +24,16 @@ class MusicPlaybackService : MediaSessionService() {
     private var mediaSession: MediaSession? = null
     private var player: ExoPlayer? = null
     
+    companion object {
+        private const val NOTIFICATION_CHANNEL_ID = "euphoriae_playback_channel"
+        private const val TAG = "MusicPlaybackService"
+    }
+    
     override fun onCreate() {
         super.onCreate()
         
-        // Create ExoPlayer with audio attributes
+        createNotificationChannel()
+        
         player = ExoPlayer.Builder(this)
             .setAudioAttributes(
                 AudioAttributes.Builder()
@@ -36,7 +45,6 @@ class MusicPlaybackService : MediaSessionService() {
             .setHandleAudioBecomingNoisy(true) // Pause when headphones unplugged
             .build()
         
-        // Create pending intent for notification click
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
@@ -47,10 +55,25 @@ class MusicPlaybackService : MediaSessionService() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         
-        // Create MediaSession
         mediaSession = MediaSession.Builder(this, player!!)
             .setSessionActivity(pendingIntent)
             .build()
+    }
+    
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                NOTIFICATION_CHANNEL_ID,
+                "Music Playback",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Shows current playing music"
+                setShowBadge(false)
+            }
+            
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(channel)
+        }
     }
     
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
@@ -74,31 +97,9 @@ class MusicPlaybackService : MediaSessionService() {
         super.onDestroy()
     }
     
-    fun playSong(song: Song) {
-        val mediaItem = MediaItem.Builder()
-            .setUri(Uri.parse(song.data))
-            .setMediaMetadata(
-                MediaMetadata.Builder()
-                    .setTitle(song.title)
-                    .setArtist(song.artist)
-                    .setAlbumTitle(song.album)
-                    .setArtworkUri(song.albumArtUri?.let { Uri.parse(it) })
-                    .build()
-            )
-            .build()
-        
-        player?.apply {
-            setMediaItem(mediaItem)
-            prepare()
-            play()
-        }
-    }
+    fun getPlayer(): ExoPlayer? = player
     
     fun getAudioSessionId(): Int {
         return player?.audioSessionId ?: 0
-    }
-    
-    companion object {
-        private const val TAG = "MusicPlaybackService"
     }
 }

@@ -2,10 +2,15 @@ package com.oss.euphoriae.ui.viewmodel
 
 import android.app.Application
 import android.content.ComponentName
+import android.content.ContentUris
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
@@ -13,7 +18,6 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.oss.euphoriae.EuphoriaeApp
 import com.oss.euphoriae.data.`class`.AudioEffectsManager
-import com.oss.euphoriae.data.`class`.EuphoriaePlayer
 import com.oss.euphoriae.data.model.Playlist
 import com.oss.euphoriae.data.model.Song
 import com.oss.euphoriae.service.MusicPlaybackService
@@ -26,9 +30,9 @@ import kotlinx.coroutines.launch
 data class MusicUiState(
     val songs: List<Song> = emptyList(),
     val playlists: List<Playlist> = emptyList(),
-    val playlistSongs: List<Song> = emptyList(), // Songs in selected playlist
-    val queue: List<Song> = emptyList(), // Current playback queue
-    val currentQueueIndex: Int = -1, // Current position in queue
+    val playlistSongs: List<Song> = emptyList(),
+    val queue: List<Song> = emptyList(),
+    val currentQueueIndex: Int = -1,
     val currentSong: Song? = null,
     val isPlaying: Boolean = false,
     val currentPosition: Long = 0L,
@@ -39,13 +43,12 @@ data class MusicUiState(
     val error: String? = null,
     val searchQuery: String = "",
     val isShuffleOn: Boolean = false,
-    val repeatMode: Int = 0 // 0 = off, 1 = all, 2 = one
+    val repeatMode: Int = 0
 )
 
 class MusicViewModel(application: Application) : AndroidViewModel(application) {
     
     private val repository = (application as EuphoriaeApp).musicRepository
-    private val player = EuphoriaePlayer(application.applicationContext)
     
     val audioEffectsManager = AudioEffectsManager()
     private var audioEffectsInitialized = false
@@ -73,11 +76,12 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         override fun onPlaybackStateChanged(playbackState: Int) {
             when (playbackState) {
                 Player.STATE_READY -> {
+                    val controller = mediaController ?: return
                     _uiState.update { 
-                        it.copy(duration = player.duration)
+                        it.copy(duration = controller.duration)
                     }
-                    if (!audioEffectsInitialized && player.audioSessionId != 0) {
-                        audioEffectsManager.initialize(player.audioSessionId)
+                    if (!audioEffectsInitialized && controller.audioSessionId != 0) {
+                        audioEffectsManager.initialize(controller.audioSessionId)
                         audioEffectsInitialized = true
                     }
                 }
@@ -88,7 +92,7 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         }
         
         override fun onMediaItemTransition(
-            mediaItem: androidx.media3.common.MediaItem?,
+            mediaItem: MediaItem?,
             reason: Int
         ) {
             updateCurrentPosition()
@@ -96,14 +100,14 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     }
     
     init {
-        player.initialize()
-        player.addListener(playerListener)
         loadSongs()
         loadPlaylists()
         connectToService()
     }
     
     private fun connectToService() {
+        startService()
+        
         val app = getApplication<Application>()
         val sessionToken = SessionToken(
             app,
@@ -111,7 +115,12 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         )
         controllerFuture = MediaController.Builder(app, sessionToken).buildAsync()
         controllerFuture?.addListener({
-            mediaController = controllerFuture?.get()
+            try {
+                mediaController = controllerFuture?.get()
+                mediaController?.addListener(playerListener)
+            } catch (e: Exception) {
+                android.util.Log.e("MusicViewModel", "Failed to connect to service", e)
+            }
         }, MoreExecutors.directExecutor())
     }
     
@@ -207,13 +216,15 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     }
     
     fun playSong(song: Song) {
+        val controller = mediaController ?: return
+        
         val currentState = _uiState.value
         val songs = currentState.songs
         val songIndex = songs.indexOfFirst { it.id == song.id }
         
         _uiState.update { 
             it.copy(
-                queue = songs, // Set queue to all songs
+                queue = songs,
                 currentQueueIndex = songIndex,
                 currentSong = song,
                 isPlaying = true,
@@ -223,28 +234,36 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
         
-        val contentUri = android.content.ContentUris.withAppendedId(
-            android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+        val contentUri = ContentUris.withAppendedId(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             song.id
-        ).toString()
+        )
         
-        player.setup(contentUri, playWhenReady = true, speed = 1f)
+        val mediaItem = MediaItem.Builder()
+            .setUri(contentUri)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(song.title)
+                    .setArtist(song.artist)
+                    .setAlbumTitle(song.album)
+                    .setArtworkUri(song.albumArtUri?.let { Uri.parse(it) })
+                    .build()
+            )
+            .build()
+        
+        controller.setMediaItem(mediaItem)
+        controller.prepare()
+        controller.play()
     }
     
     fun playSongFromList(song: Song, songList: List<Song>) {
-        val songIndex = songList.indexOfFirst { it.id == song.id }
+        val controller = mediaController ?: return
         
-        android.util.Log.d("MusicViewModel", "=== PLAY SONG FROM LIST ===")
-        android.util.Log.d("MusicViewModel", "Song clicked - ID: ${song.id}, Title: ${song.title}")
-        android.util.Log.d("MusicViewModel", "Song index in list: $songIndex")
-        android.util.Log.d("MusicViewModel", "List size: ${songList.size}")
-        songList.forEachIndexed { index, s ->
-            android.util.Log.d("MusicViewModel", "  List[$index] - ID: ${s.id}, Title: ${s.title}")
-        }
+        val songIndex = songList.indexOfFirst { it.id == song.id }
         
         _uiState.update { 
             it.copy(
-                queue = songList, // Set queue to provided list
+                queue = songList,
                 currentQueueIndex = if (songIndex >= 0) songIndex else 0,
                 currentSong = song,
                 isPlaying = true,
@@ -254,25 +273,39 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
         
-        val contentUri = android.content.ContentUris.withAppendedId(
-            android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+        val contentUri = ContentUris.withAppendedId(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             song.id
-        ).toString()
+        )
         
-        android.util.Log.d("MusicViewModel", "Playing URI: $contentUri")
+        val mediaItem = MediaItem.Builder()
+            .setUri(contentUri)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(song.title)
+                    .setArtist(song.artist)
+                    .setAlbumTitle(song.album)
+                    .setArtworkUri(song.albumArtUri?.let { Uri.parse(it) })
+                    .build()
+            )
+            .build()
         
-        player.setup(contentUri, playWhenReady = true, speed = 1f)
+        controller.setMediaItem(mediaItem)
+        controller.prepare()
+        controller.play()
     }
     
     fun togglePlayPause() {
-        if (player.isPlaying) {
-            player.pause()
+        val controller = mediaController ?: return
+        if (controller.isPlaying) {
+            controller.pause()
         } else {
-            player.play()
+            controller.play()
         }
     }
     
     fun playNext() {
+        val controller = mediaController ?: return
         val currentState = _uiState.value
         val queue = currentState.queue.ifEmpty { currentState.songs }
         
@@ -296,22 +329,37 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
         
-        val contentUri = android.content.ContentUris.withAppendedId(
-            android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+        val contentUri = ContentUris.withAppendedId(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             nextSong.id
-        ).toString()
+        )
         
-        player.setup(contentUri, playWhenReady = true, speed = 1f)
+        val mediaItem = MediaItem.Builder()
+            .setUri(contentUri)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(nextSong.title)
+                    .setArtist(nextSong.artist)
+                    .setAlbumTitle(nextSong.album)
+                    .setArtworkUri(nextSong.albumArtUri?.let { Uri.parse(it) })
+                    .build()
+            )
+            .build()
+        
+        controller.setMediaItem(mediaItem)
+        controller.prepare()
+        controller.play()
     }
     
     fun playPrevious() {
+        val controller = mediaController ?: return
         val currentState = _uiState.value
         val queue = currentState.queue.ifEmpty { currentState.songs }
         
         if (queue.isEmpty()) return
         
-        if (player.currentPosition > 3000) {
-            player.seekTo(0)
+        if (controller.currentPosition > 3000) {
+            controller.seekTo(0)
             return
         }
         
@@ -329,18 +377,33 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
         
-        val contentUri = android.content.ContentUris.withAppendedId(
-            android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+        val contentUri = ContentUris.withAppendedId(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             prevSong.id
-        ).toString()
+        )
         
-        player.setup(contentUri, playWhenReady = true, speed = 1f)
+        val mediaItem = MediaItem.Builder()
+            .setUri(contentUri)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(prevSong.title)
+                    .setArtist(prevSong.artist)
+                    .setAlbumTitle(prevSong.album)
+                    .setArtworkUri(prevSong.albumArtUri?.let { Uri.parse(it) })
+                    .build()
+            )
+            .build()
+        
+        controller.setMediaItem(mediaItem)
+        controller.prepare()
+        controller.play()
     }
     
     fun seekTo(progress: Float) {
+        val controller = mediaController ?: return
         val duration = _uiState.value.duration
         val position = (progress * duration).toLong()
-        player.seekTo(position)
+        controller.seekTo(position)
         _uiState.update { 
             it.copy(
                 progress = progress,
@@ -350,7 +413,8 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     }
     
     fun seekToPosition(positionMs: Long) {
-        player.seekTo(positionMs)
+        val controller = mediaController ?: return
+        controller.seekTo(positionMs)
         val duration = _uiState.value.duration
         val progress = if (duration > 0) positionMs.toFloat() / duration else 0f
         _uiState.update { 
@@ -362,22 +426,22 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     }
     
     fun toggleShuffle() {
+        val controller = mediaController ?: return
         val newShuffleState = !_uiState.value.isShuffleOn
         _uiState.update { it.copy(isShuffleOn = newShuffleState) }
-        player.setShuffleModeEnabled(newShuffleState)
+        controller.shuffleModeEnabled = newShuffleState
     }
     
     fun toggleRepeat() {
+        val controller = mediaController ?: return
         val newRepeatMode = (_uiState.value.repeatMode + 1) % 3
         _uiState.update { it.copy(repeatMode = newRepeatMode) }
         
-        player.setRepeatMode(
-            when (newRepeatMode) {
-                1 -> Player.REPEAT_MODE_ALL
-                2 -> Player.REPEAT_MODE_ONE
-                else -> Player.REPEAT_MODE_OFF
-            }
-        )
+        controller.repeatMode = when (newRepeatMode) {
+            1 -> Player.REPEAT_MODE_ALL
+            2 -> Player.REPEAT_MODE_ONE
+            else -> Player.REPEAT_MODE_OFF
+        }
     }
     
     private fun startProgressUpdates() {
@@ -385,7 +449,7 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         progressJob = viewModelScope.launch {
             while (isActive) {
                 updateCurrentPosition()
-                delay(500L) // Update every 500ms
+                delay(500L)
             }
         }
     }
@@ -396,8 +460,9 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     }
     
     private fun updateCurrentPosition() {
-        val currentPosition = player.currentPosition
-        val duration = player.duration.takeIf { it > 0 } ?: _uiState.value.duration
+        val controller = mediaController ?: return
+        val currentPosition = controller.currentPosition
+        val duration = controller.duration.takeIf { it > 0 } ?: _uiState.value.duration
         val progress = if (duration > 0) currentPosition.toFloat() / duration else 0f
         
         _uiState.update {
@@ -415,8 +480,8 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         
         when (currentState.repeatMode) {
             2 -> {
-                player.seekTo(0)
-                player.play()
+                mediaController?.seekTo(0)
+                mediaController?.play()
             }
             1 -> {
                 playNext()
@@ -465,9 +530,8 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     override fun onCleared() {
         super.onCleared()
         stopProgressUpdates()
-        player.removeListener(playerListener)
+        mediaController?.removeListener(playerListener)
         audioEffectsManager.release()
         controllerFuture?.let { MediaController.releaseFuture(it) }
-        player.release()
     }
 }
