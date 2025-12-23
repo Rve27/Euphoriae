@@ -35,6 +35,7 @@ import com.oss.euphoriae.ui.screens.HomeScreen
 import com.oss.euphoriae.ui.screens.NowPlayingScreen
 import com.oss.euphoriae.ui.screens.PlaylistDetailScreen
 import com.oss.euphoriae.ui.screens.PlaylistScreen
+import com.oss.euphoriae.ui.screens.SettingsScreen
 import com.oss.euphoriae.ui.screens.SongsScreen
 import com.oss.euphoriae.ui.theme.EuphoriaeTheme
 import com.oss.euphoriae.ui.viewmodel.MusicViewModel
@@ -214,7 +215,8 @@ fun AppNavHost(
                 playlists = uiState.playlists,
                 isScanning = uiState.isScanning,
                 onSongClick = onSongClick,
-                onScanClick = onScanClick
+                onScanClick = onScanClick,
+                onSettingsClick = { navController.navigate("settings") }
             )
         }
         composable(Destination.SONGS.route) {
@@ -254,6 +256,11 @@ fun AppNavHost(
         }
         composable(Destination.EQUALIZER.route) {
             EqualizerScreen(audioEffectsManager = audioEffectsManager)
+        }
+        composable("settings") {
+            SettingsScreen(
+                onBackClick = { navController.popBackStack() }
+            )
         }
     }
 }

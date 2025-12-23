@@ -37,6 +37,7 @@ fun HomeScreen(
     isScanning: Boolean,
     onSongClick: (Song, List<Song>) -> Unit,
     onScanClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -111,7 +112,7 @@ fun HomeScreen(
                             Icon(Icons.Default.Refresh, contentDescription = "Refresh")
                         }
                     }
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = onSettingsClick) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
                     }
                 },
