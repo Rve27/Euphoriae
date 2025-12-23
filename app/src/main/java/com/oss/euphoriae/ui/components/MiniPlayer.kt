@@ -36,9 +36,11 @@ fun MiniPlayer(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .padding(10.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
-        tonalElevation = 3.dp
+        tonalElevation = 3.dp,
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column {
             LinearProgressIndicator(
