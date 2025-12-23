@@ -1,7 +1,7 @@
 # Euphoriae
 
 <p align="center">
-  <img src="logo/logo.png" width="120" alt="Euphoriae Logo" style="border-radius: 900px;"/>
+  <img src="logo/logo.png" width="120" alt="Euphoriae Logo"/>
 </p>
 
 <p align="center">
@@ -44,7 +44,7 @@
 
 ### Prerequisites
 - Android Studio Otter 2
-- Android SDK 26+
+- Android SDK 25+
 - Kotlin 2.0+
 
 ### Build
