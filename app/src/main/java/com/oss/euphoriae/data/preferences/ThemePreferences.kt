@@ -1,15 +1,10 @@
 package com.oss.euphoriae.data.preferences
 
 import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
+import android.content.SharedPreferences
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+import kotlinx.coroutines.flow.callbackFlow
 
 enum class ThemeColorOption(val displayName: String) {
     DYNAMIC("Dynamic"),
@@ -21,24 +16,42 @@ enum class ThemeColorOption(val displayName: String) {
     RED("Red")
 }
 
-class ThemePreferences(private val context: Context) {
+class ThemePreferences(context: Context) {
     
     companion object {
-        private val THEME_COLOR_KEY = stringPreferencesKey("theme_color")
+        private const val PREFS_NAME = "euphoriae_theme_prefs"
+        private const val KEY_THEME_COLOR = "theme_color"
     }
     
-    val themeColor: Flow<ThemeColorOption> = context.dataStore.data.map { preferences ->
-        val colorName = preferences[THEME_COLOR_KEY] ?: ThemeColorOption.DYNAMIC.name
-        try {
-            ThemeColorOption.valueOf(colorName)
+    private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    
+    val themeColor: Flow<ThemeColorOption> = callbackFlow {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == KEY_THEME_COLOR) {
+                trySend(getCurrentThemeColor())
+            }
+        }
+        
+        // Emit initial value
+        trySend(getCurrentThemeColor())
+        
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        
+        awaitClose {
+            prefs.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
+    
+    fun getCurrentThemeColor(): ThemeColorOption {
+        val colorName = prefs.getString(KEY_THEME_COLOR, ThemeColorOption.DYNAMIC.name)
+        return try {
+            ThemeColorOption.valueOf(colorName ?: ThemeColorOption.DYNAMIC.name)
         } catch (e: IllegalArgumentException) {
             ThemeColorOption.DYNAMIC
         }
     }
     
-    suspend fun setThemeColor(option: ThemeColorOption) {
-        context.dataStore.edit { preferences ->
-            preferences[THEME_COLOR_KEY] = option.name
-        }
+    fun setThemeColor(option: ThemeColorOption) {
+        prefs.edit().putString(KEY_THEME_COLOR, option.name).apply()
     }
 }

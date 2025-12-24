@@ -41,7 +41,6 @@ import com.oss.euphoriae.ui.screens.SettingsScreen
 import com.oss.euphoriae.ui.screens.SongsScreen
 import com.oss.euphoriae.ui.theme.EuphoriaeTheme
 import com.oss.euphoriae.ui.viewmodel.MusicViewModel
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     
@@ -100,8 +99,6 @@ fun EuphoriaeMainApp(
     val showBottomBar = currentRoute != "now_playing"
     
     val snackbarHostState = remember { SnackbarHostState() }
-    
-    val coroutineScope = rememberCoroutineScope()
     
     LaunchedEffect(uiState.error) {
         uiState.error?.let { error ->
@@ -200,9 +197,7 @@ fun EuphoriaeMainApp(
                 audioEffectsManager = viewModel.audioEffectsManager,
                 currentThemeColor = currentThemeColor,
                 onThemeColorChange = { option ->
-                    coroutineScope.launch {
-                        themePreferences.setThemeColor(option)
-                    }
+                    themePreferences.setThemeColor(option)
                 },
                 modifier = Modifier.padding(contentPadding)
             )
