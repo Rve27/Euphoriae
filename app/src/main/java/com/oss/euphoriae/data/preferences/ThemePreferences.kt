@@ -16,11 +16,18 @@ enum class ThemeColorOption(val displayName: String) {
     RED("Red")
 }
 
+enum class DarkModeOption(val displayName: String) {
+    SYSTEM("System"),
+    LIGHT("Light"),
+    DARK("Dark")
+}
+
 class ThemePreferences(context: Context) {
     
     companion object {
         private const val PREFS_NAME = "euphoriae_theme_prefs"
         private const val KEY_THEME_COLOR = "theme_color"
+        private const val KEY_DARK_MODE = "dark_mode"
     }
     
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -31,12 +38,21 @@ class ThemePreferences(context: Context) {
                 trySend(getCurrentThemeColor())
             }
         }
-        
-        // Emit initial value
         trySend(getCurrentThemeColor())
-        
         prefs.registerOnSharedPreferenceChangeListener(listener)
-        
+        awaitClose {
+            prefs.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
+    
+    val darkMode: Flow<DarkModeOption> = callbackFlow {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == KEY_DARK_MODE) {
+                trySend(getCurrentDarkMode())
+            }
+        }
+        trySend(getCurrentDarkMode())
+        prefs.registerOnSharedPreferenceChangeListener(listener)
         awaitClose {
             prefs.unregisterOnSharedPreferenceChangeListener(listener)
         }
@@ -51,7 +67,20 @@ class ThemePreferences(context: Context) {
         }
     }
     
+    fun getCurrentDarkMode(): DarkModeOption {
+        val modeName = prefs.getString(KEY_DARK_MODE, DarkModeOption.SYSTEM.name)
+        return try {
+            DarkModeOption.valueOf(modeName ?: DarkModeOption.SYSTEM.name)
+        } catch (e: IllegalArgumentException) {
+            DarkModeOption.SYSTEM
+        }
+    }
+    
     fun setThemeColor(option: ThemeColorOption) {
         prefs.edit().putString(KEY_THEME_COLOR, option.name).apply()
+    }
+    
+    fun setDarkMode(option: DarkModeOption) {
+        prefs.edit().putString(KEY_DARK_MODE, option.name).apply()
     }
 }

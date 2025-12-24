@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -29,6 +30,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.oss.euphoriae.data.model.Song
+import com.oss.euphoriae.data.preferences.DarkModeOption
 import com.oss.euphoriae.data.preferences.ThemeColorOption
 import com.oss.euphoriae.data.preferences.ThemePreferences
 import com.oss.euphoriae.ui.components.MiniPlayer
@@ -53,14 +55,24 @@ class MainActivity : ComponentActivity() {
             val themeColor by themePreferences.themeColor.collectAsStateWithLifecycle(
                 initialValue = ThemeColorOption.DYNAMIC
             )
+            val darkModeOption by themePreferences.darkMode.collectAsStateWithLifecycle(
+                initialValue = DarkModeOption.SYSTEM
+            )
+            
+            val darkTheme = when (darkModeOption) {
+                DarkModeOption.SYSTEM -> isSystemInDarkTheme()
+                DarkModeOption.LIGHT -> false
+                DarkModeOption.DARK -> true
+            }
             
             EuphoriaeTheme(
-                darkTheme = true,
+                darkTheme = darkTheme,
                 themeColor = themeColor
             ) {
                 EuphoriaeMainApp(
                     themePreferences = themePreferences,
-                    currentThemeColor = themeColor
+                    currentThemeColor = themeColor,
+                    currentDarkMode = darkModeOption
                 )
             }
         }
@@ -83,7 +95,8 @@ enum class Destination(
 fun EuphoriaeMainApp(
     viewModel: MusicViewModel = viewModel(),
     themePreferences: ThemePreferences,
-    currentThemeColor: ThemeColorOption
+    currentThemeColor: ThemeColorOption,
+    currentDarkMode: DarkModeOption
 ) {
     val navController = rememberNavController()
     val startDestination = Destination.HOME
@@ -199,6 +212,10 @@ fun EuphoriaeMainApp(
                 onThemeColorChange = { option ->
                     themePreferences.setThemeColor(option)
                 },
+                currentDarkMode = currentDarkMode,
+                onDarkModeChange = { option ->
+                    themePreferences.setDarkMode(option)
+                },
                 modifier = Modifier.padding(contentPadding)
             )
         }
@@ -220,6 +237,8 @@ fun AppNavHost(
     audioEffectsManager: com.oss.euphoriae.data.`class`.AudioEffectsManager,
     currentThemeColor: ThemeColorOption,
     onThemeColorChange: (ThemeColorOption) -> Unit,
+    currentDarkMode: DarkModeOption,
+    onDarkModeChange: (DarkModeOption) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var selectedPlaylist by remember { mutableStateOf<com.oss.euphoriae.data.model.Playlist?>(null) }
@@ -281,7 +300,9 @@ fun AppNavHost(
             SettingsScreen(
                 onBackClick = { navController.popBackStack() },
                 currentThemeColor = currentThemeColor,
-                onThemeColorChange = onThemeColorChange
+                onThemeColorChange = onThemeColorChange,
+                currentDarkMode = currentDarkMode,
+                onDarkModeChange = onDarkModeChange
             )
         }
     }

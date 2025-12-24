@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Wallpaper
@@ -22,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.oss.euphoriae.data.preferences.DarkModeOption
 import com.oss.euphoriae.data.preferences.ThemeColorOption
 import com.oss.euphoriae.ui.theme.*
 
@@ -47,6 +49,8 @@ fun SettingsScreen(
     onBackClick: () -> Unit,
     currentThemeColor: ThemeColorOption,
     onThemeColorChange: (ThemeColorOption) -> Unit,
+    currentDarkMode: DarkModeOption,
+    onDarkModeChange: (DarkModeOption) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -86,6 +90,41 @@ fun SettingsScreen(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
             
+            // Dark Mode Selector
+            ListItem(
+                headlineContent = { Text("Dark Mode") },
+                supportingContent = { Text(currentDarkMode.displayName) },
+                leadingContent = {
+                    Icon(
+                        imageVector = Icons.Default.DarkMode,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            )
+            
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                DarkModeOption.entries.forEachIndexed { index, option ->
+                    SegmentedButton(
+                        selected = currentDarkMode == option,
+                        onClick = { onDarkModeChange(option) },
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = DarkModeOption.entries.size
+                        )
+                    ) {
+                        Text(option.displayName)
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Theme Color Selector
             ListItem(
                 headlineContent = { Text("Theme Color") },
                 supportingContent = { Text(currentThemeColor.displayName) },
