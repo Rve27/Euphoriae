@@ -17,6 +17,7 @@
 #include "audio_engine.h"
 #include <android/log.h>
 #include <algorithm>
+#include <chrono>
 
 #define LOG_TAG "EuphoriaeAudio"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
@@ -30,6 +31,9 @@ AudioEngine::AudioEngine() {
 
 void AudioEngine::processAudio(float* buffer, int32_t numFrames, int32_t channelCount) {
     if (buffer == nullptr || numFrames <= 0) return;
+    
+    // Start timing
+    auto startTime = std::chrono::high_resolution_clock::now();
     
     // Apply effects in order
     float bassBoost = mBassBoost.load();
@@ -50,27 +54,41 @@ void AudioEngine::processAudio(float* buffer, int32_t numFrames, int32_t channel
     if (std::abs(volume - 1.0f) > 0.001f) {
         applyVolume(buffer, numFrames * channelCount);
     }
+    
+    // End timing and calculate latency
+    auto endTime = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+    
+    // Log every 100 buffers to avoid spam
+    static int bufferCount = 0;
+    bufferCount++;
+    if (bufferCount % 100 == 0) {
+        float latencyMs = duration.count() / 1000.0f;
+        float bufferDurationMs = (numFrames * 1000.0f) / 48000.0f; // Assuming 48kHz
+        LOGI("Processing latency: %.3f ms | Buffer: %.2f ms | Frames: %d | Channels: %d", 
+             latencyMs, bufferDurationMs, numFrames, channelCount);
+    }
 }
 
 void AudioEngine::setVolume(float volume) {
     mVolume.store(std::clamp(volume, 0.0f, 2.0f));
-    LOGD("Volume set to: %.2f", volume);
+    LOGI("Volume set to: %.2f", volume);
 }
 
 void AudioEngine::setBassBoost(float strength) {
     mBassBoost.store(std::clamp(strength, 0.0f, 1.0f));
-    LOGD("Bass boost set to: %.2f", strength);
+    LOGI("Bass boost set to: %.2f", strength);
 }
 
 void AudioEngine::setVirtualizer(float strength) {
     mVirtualizer.store(std::clamp(strength, 0.0f, 1.0f));
-    LOGD("Virtualizer set to: %.2f", strength);
+    LOGI("Virtualizer set to: %.2f", strength);
 }
 
 void AudioEngine::setEqualizerBand(int band, float gainDb) {
     if (band >= 0 && band < kNumEqualizerBands) {
         mEqualizerBands[band].store(std::clamp(gainDb, -12.0f, 12.0f));
-        LOGD("EQ band %d set to: %.2f dB", band, gainDb);
+        LOGI("EQ band %d set to: %.2f dB", band, gainDb);
     }
 }
 

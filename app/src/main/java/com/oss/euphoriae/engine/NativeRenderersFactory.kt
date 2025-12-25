@@ -17,17 +17,13 @@
 package com.oss.euphoriae.engine
 
 import android.content.Context
-import android.os.Handler
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.audio.AudioProcessor
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
-import androidx.media3.exoplayer.audio.AudioRendererEventListener
 import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink
-import androidx.media3.exoplayer.audio.MediaCodecAudioRenderer
-import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
-import androidx.media3.exoplayer.Renderer
 
 /**
  * Custom RenderersFactory that injects NativeAudioProcessor into ExoPlayer's
@@ -41,8 +37,13 @@ class NativeRenderersFactory(
 
     private var nativeAudioProcessor: NativeAudioProcessor? = null
 
+    companion object {
+        private const val TAG = "NativeRenderersFactory"
+    }
+
     init {
         setExtensionRendererMode(EXTENSION_RENDERER_MODE_PREFER)
+        Log.i(TAG, "NativeRenderersFactory created")
     }
 
     override fun buildAudioSink(
@@ -50,15 +51,21 @@ class NativeRenderersFactory(
         enableFloatOutput: Boolean,
         enableAudioTrackPlaybackParams: Boolean
     ): AudioSink {
+        Log.i(TAG, "buildAudioSink called - creating NativeAudioProcessor")
+        
         // Create our native audio processor
         nativeAudioProcessor = NativeAudioProcessor(audioEngine)
         
-        return DefaultAudioSink.Builder(context)
+        val audioSink = DefaultAudioSink.Builder(context)
             .setEnableFloatOutput(enableFloatOutput)
             .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
             .setAudioProcessors(arrayOf(nativeAudioProcessor!!))
             .build()
+        
+        Log.i(TAG, "AudioSink created with NativeAudioProcessor")
+        return audioSink
     }
 
     fun getNativeAudioProcessor(): NativeAudioProcessor? = nativeAudioProcessor
 }
+

@@ -40,13 +40,14 @@ class NativeAudioProcessor(private val audioEngine: AudioEngine) : AudioProcesso
     private var inputEnded = false
     
     private var floatBuffer: FloatArray = FloatArray(0)
+    private var bufferCounter = 0
 
     companion object {
         private const val TAG = "NativeAudioProcessor"
     }
 
     override fun configure(inputAudioFormat: AudioProcessor.AudioFormat): AudioProcessor.AudioFormat {
-        Log.d(TAG, "Configure: sampleRate=${inputAudioFormat.sampleRate}, " +
+        Log.i(TAG, "Configure called: sampleRate=${inputAudioFormat.sampleRate}, " +
                 "channels=${inputAudioFormat.channelCount}, " +
                 "encoding=${inputAudioFormat.encoding}")
         
@@ -62,11 +63,13 @@ class NativeAudioProcessor(private val audioEngine: AudioEngine) : AudioProcesso
         // Output same format as input
         this.outputAudioFormat = inputAudioFormat
         
+        Log.i(TAG, "Processor configured successfully, isActive=${isActive()}")
         return outputAudioFormat
     }
 
     override fun isActive(): Boolean {
-        return inputAudioFormat != AudioProcessor.AudioFormat.NOT_SET
+        val active = inputAudioFormat != AudioProcessor.AudioFormat.NOT_SET
+        return active
     }
 
     override fun queueInput(inputBuffer: ByteBuffer) {
@@ -74,6 +77,12 @@ class NativeAudioProcessor(private val audioEngine: AudioEngine) : AudioProcesso
         
         val inputSize = inputBuffer.remaining()
         val channelCount = inputAudioFormat.channelCount
+        
+        // Log every 100th buffer
+        bufferCounter++
+        if (bufferCounter % 100 == 0) {
+            Log.i(TAG, "queueInput: size=$inputSize, encoding=${inputAudioFormat.encoding}, counter=$bufferCounter")
+        }
         
         when (inputAudioFormat.encoding) {
             C.ENCODING_PCM_16BIT -> {
