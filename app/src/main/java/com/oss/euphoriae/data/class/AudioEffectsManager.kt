@@ -4,6 +4,7 @@ import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
 import android.util.Log
+import com.oss.euphoriae.engine.AudioEngine
 
 class AudioEffectsManager {
     
@@ -18,6 +19,10 @@ class AudioEffectsManager {
     
     private var bassBoostLevel: Float = 0f
     private var virtualizerLevel: Float = 0f
+    
+    // Native audio engine reference
+    private var nativeEngine: AudioEngine? = null
+    private var useNativeEffects: Boolean = false
     
     fun initialize(audioSessionId: Int) {
         if (audioSessionId == 0) {
@@ -55,6 +60,36 @@ class AudioEffectsManager {
             
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize audio effects", e)
+        }
+    }
+    
+    /**
+     * Attach native audio engine for high-performance effects
+     */
+    fun attachNativeEngine(engine: AudioEngine?) {
+        nativeEngine = engine
+        if (engine != null) {
+            Log.d(TAG, "Native AudioEngine attached")
+            // Sync current settings to native engine
+            syncToNativeEngine()
+        }
+    }
+    
+    /**
+     * Enable or disable native effects processing
+     */
+    fun setUseNativeEffects(enabled: Boolean) {
+        useNativeEffects = enabled
+        Log.d(TAG, "Native effects: $enabled")
+    }
+    
+    private fun syncToNativeEngine() {
+        nativeEngine?.apply {
+            setBassBoost(bassBoostLevel)
+            setVirtualizer(virtualizerLevel)
+            bandLevels.forEachIndexed { index, level ->
+                setEqualizerBand(index, level * 12f) // Convert to dB range
+            }
         }
     }
     
@@ -105,6 +140,11 @@ class AudioEffectsManager {
                 }
                 
                 equalizer?.setBandLevel(band.toShort(), mBLevel)
+                
+                // Also apply to native engine
+                if (useNativeEffects) {
+                    nativeEngine?.setEqualizerBand(band, level * 12f)
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to set band level", e)
             }
@@ -133,6 +173,11 @@ class AudioEffectsManager {
         bassBoostLevel = level.coerceIn(0f, 1f)
         try {
             bassBoost?.setStrength((bassBoostLevel * 1000).toInt().toShort())
+            
+            // Also apply to native engine
+            if (useNativeEffects) {
+                nativeEngine?.setBassBoost(bassBoostLevel)
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to set bass boost", e)
         }
@@ -144,6 +189,11 @@ class AudioEffectsManager {
         virtualizerLevel = level.coerceIn(0f, 1f)
         try {
             virtualizer?.setStrength((virtualizerLevel * 1000).toInt().toShort())
+            
+            // Also apply to native engine
+            if (useNativeEffects) {
+                nativeEngine?.setVirtualizer(virtualizerLevel)
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to set virtualizer", e)
         }
@@ -182,6 +232,7 @@ class AudioEffectsManager {
         equalizer = null
         bassBoost = null
         virtualizer = null
+        nativeEngine = null
     }
     
     companion object {
@@ -200,3 +251,4 @@ class AudioEffectsManager {
         )
     }
 }
+
