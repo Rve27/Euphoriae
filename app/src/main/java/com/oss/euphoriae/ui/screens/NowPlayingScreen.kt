@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,12 +32,11 @@ import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import coil.request.ImageRequest
+import com.oss.euphoriae.data.model.Lyrics
 import com.oss.euphoriae.data.model.Playlist
 import com.oss.euphoriae.data.model.Song
 import com.oss.euphoriae.ui.components.MusicVisualizer
 import com.oss.euphoriae.ui.theme.EuphoriaeTheme
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,10 +55,13 @@ fun NowPlayingScreen(
     isShuffleOn: Boolean = false,
     repeatMode: Int = 0, // 0 = off, 1 = all, 2 = one
     playlists: List<Playlist> = emptyList(),
-    onAddToPlaylist: (Long) -> Unit = {} // playlistId
+    onAddToPlaylist: (Long) -> Unit = {}, // playlistId
+    lyrics: Lyrics? = null,
+    currentLyricIndex: Int = -1
 ) {
     
     var showPlaylistDialog by remember { mutableStateOf(false) }
+    var showLyrics by remember { mutableStateOf(false) }
     
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
@@ -118,13 +121,7 @@ fun NowPlayingScreen(
                     }
                 },
                 actions = {
-                    
-                    IconButton(onClick = { showPlaylistDialog = true }) {
-                        Icon(
-                            imageVector = Icons.Default.PlaylistAdd,
-                            contentDescription = "Add to Playlist"
-                        )
-                    }
+                    // Empty actions as we moved them to bottom
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent
@@ -290,6 +287,7 @@ fun NowPlayingScreen(
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 
+                // Main Controls (Shuffle...Repeat)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -359,7 +357,42 @@ fun NowPlayingScreen(
                     }
                 }
                 
+                // Bottom Feature Row (Lyrics, Playlist/Menu)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                     IconButton(onClick = { showLyrics = !showLyrics }) {
+                        Icon(
+                            imageVector = Icons.Outlined.ChatBubbleOutline, // Use Outlined explicitly
+                            contentDescription = "Lyrics",
+                            tint = if (showLyrics) accentColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                    
+                    // AirPlay/Cast placeholder? Maybe just spacer for now or empty 
+                    
+                     IconButton(onClick = { showPlaylistDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.QueueMusic, // Queue music looks better for playlist/queue
+                            contentDescription = "Playlist",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                }
+                
                 Spacer(modifier = Modifier.height(24.dp))
+            }
+            
+            if (showLyrics) {
+                LyricsScreen(
+                    lyrics = lyrics,
+                    currentLyricIndex = currentLyricIndex,
+                    onDismiss = { showLyrics = false }
+                )
             }
         }
     }

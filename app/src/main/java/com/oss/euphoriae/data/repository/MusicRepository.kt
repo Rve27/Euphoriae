@@ -180,4 +180,59 @@ class MusicRepository(
     }
     
     suspend fun refreshLibrary(): Int = scanAndImportMusic()
+    
+    fun getLyrics(song: Song): Flow<com.oss.euphoriae.data.model.Lyrics?> = kotlinx.coroutines.flow.flow {
+        val lyrics = withContext(Dispatchers.IO) {
+            // Strategy 1: Try direct file access (Legacy or same directory if allowed)
+            val lrcFile = com.oss.euphoriae.utils.LrcParser.findLrcFile(song.data)
+            val lyricsFromFile = lrcFile?.let { com.oss.euphoriae.utils.LrcParser.parse(it) }
+            
+            if (lyricsFromFile != null) {
+                return@withContext lyricsFromFile
+            }
+            
+            // Strategy 2: Try MediaStore (Scoped Storage friendly)
+            // Query for files with same display name but .lrc extension
+            try {
+                val songName = song.title // Or file name without extension if possible
+                // Better to use the base of the display name if available, but we only have data path and title.
+                // Derive filename from data path
+                val songFileName = song.data.substringAfterLast('/')
+                val lrcFileName = songFileName.substringBeforeLast('.') + ".lrc"
+                
+                val projection = arrayOf(MediaStore.Files.FileColumns._ID)
+                val selection = "${MediaStore.Files.FileColumns.DISPLAY_NAME} = ?"
+                val selectionArgs = arrayOf(lrcFileName)
+                
+                // We need to query MediaStore.Files.EXTERNAL_CONTENT_URI (requires permissions on older Androids)
+                // On newer Androids, this query might fail or return nothing if we don't own the file.
+                // Catching exception is key.
+                val queryUri = MediaStore.Files.getContentUri("external")
+                
+                context.contentResolver.query(
+                    queryUri,
+                    projection,
+                    selection,
+                    selectionArgs,
+                    null
+                )?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID)
+                        val id = cursor.getLong(idColumn)
+                        val contentUri = ContentUris.withAppendedId(queryUri, id)
+                        
+                        context.contentResolver.openInputStream(contentUri)?.use { inputStream ->
+                            com.oss.euphoriae.utils.LrcParser.parse(inputStream)
+                        }
+                    } else {
+                        null
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MusicRepository", "Failed to load lyrics from MediaStore", e)
+                null
+            }
+        }
+        emit(lyrics)
+    }
 }

@@ -18,6 +18,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.oss.euphoriae.EuphoriaeApp
 import com.oss.euphoriae.data.`class`.AudioEffectsManager
+import com.oss.euphoriae.data.model.Lyrics
 import com.oss.euphoriae.data.model.Playlist
 import com.oss.euphoriae.data.model.Song
 import com.oss.euphoriae.engine.AudioEngine
@@ -47,7 +48,9 @@ data class MusicUiState(
     val repeatMode: Int = 0,
     val tempo: Float = 1.0f,
     val pitch: Float = 0.0f,
-    val albums: List<com.oss.euphoriae.data.model.Album> = emptyList()
+    val albums: List<com.oss.euphoriae.data.model.Album> = emptyList(),
+    val lyrics: Lyrics? = null,
+    val currentLyricIndex: Int = -1
 )
 
 class MusicViewModel(application: Application) : AndroidViewModel(application) {
@@ -114,6 +117,31 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         loadPlaylists()
         loadAlbums()
         connectToService()
+        observeCurrentSong()
+    }
+    
+    private fun observeCurrentSong() {
+        viewModelScope.launch {
+            uiState.map { it.currentSong }
+                .distinctUntilChanged()
+                .collect { song ->
+                    if (song != null) {
+                        loadLyrics(song)
+                    } else {
+                        _uiState.update { it.copy(lyrics = null, currentLyricIndex = -1) }
+                    }
+                }
+        }
+    }
+    
+    private fun loadLyrics(song: Song) {
+        viewModelScope.launch {
+            // Reset lyrics first
+            _uiState.update { it.copy(lyrics = null, currentLyricIndex = -1) }
+            repository.getLyrics(song).collect { lyrics ->
+                _uiState.update { it.copy(lyrics = lyrics) }
+            }
+        }
     }
     
     private fun initializeAudioEngine() {
@@ -505,11 +533,19 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         val duration = controller.duration.takeIf { it > 0 } ?: _uiState.value.duration
         val progress = if (duration > 0) currentPosition.toFloat() / duration else 0f
         
+        val lyrics = _uiState.value.lyrics
+        val currentLyricIndex = if (lyrics != null && lyrics.isSynced) {
+            lyrics.lines.indexOfLast { it.timestamp <= currentPosition }
+        } else {
+            -1
+        }
+        
         _uiState.update {
             it.copy(
                 currentPosition = currentPosition,
                 duration = duration,
-                progress = progress.coerceIn(0f, 1f)
+                progress = progress.coerceIn(0f, 1f),
+                currentLyricIndex = currentLyricIndex
             )
         }
     }

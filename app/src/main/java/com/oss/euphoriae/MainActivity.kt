@@ -152,7 +152,9 @@ fun EuphoriaeMainApp(
                 uiState.currentSong?.let { song ->
                     viewModel.addSongToPlaylist(playlistId, song.id)
                 }
-            }
+            },
+            lyrics = uiState.lyrics,
+            currentLyricIndex = uiState.currentLyricIndex
         )
     } else {
         Scaffold(
