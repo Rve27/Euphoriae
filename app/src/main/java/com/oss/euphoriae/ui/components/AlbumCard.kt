@@ -28,7 +28,43 @@ fun AlbumCard(
         shape = RoundedCornerShape(12.dp)
     ) {
         Column {
-            if (album.coverUri != null) {
+            if (album.covers.size >= 4) {
+                 // 2x2 Grid using first 4 covers
+                 Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                 ) {
+                     Row(modifier = Modifier.weight(1f)) {
+                         AsyncImage(
+                             model = album.covers[0],
+                             contentDescription = null,
+                             contentScale = ContentScale.Crop,
+                             modifier = Modifier.weight(1f).fillMaxHeight()
+                         )
+                         AsyncImage(
+                             model = album.covers[1],
+                             contentDescription = null,
+                             contentScale = ContentScale.Crop,
+                             modifier = Modifier.weight(1f).fillMaxHeight()
+                         )
+                     }
+                     Row(modifier = Modifier.weight(1f)) {
+                         AsyncImage(
+                             model = album.covers[2],
+                             contentDescription = null,
+                             contentScale = ContentScale.Crop,
+                             modifier = Modifier.weight(1f).fillMaxHeight()
+                         )
+                         AsyncImage(
+                             model = album.covers[3],
+                             contentDescription = null,
+                             contentScale = ContentScale.Crop,
+                             modifier = Modifier.weight(1f).fillMaxHeight()
+                         )
+                     }
+                 }
+            } else if (album.coverUri != null) {
                 AsyncImage(
                     model = album.coverUri,
                     contentDescription = album.name,
@@ -56,13 +92,13 @@ fun AlbumCard(
             
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
-                    text = album.name,
+                    text = album.artist,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = album.artist,
+                    text = "${album.songCount} Songs",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

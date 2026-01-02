@@ -566,11 +566,12 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     fun createPlaylistFromAlbum(album: com.oss.euphoriae.data.model.Album) {
         viewModelScope.launch {
             try {
-                // 1. Create playlist with album name
-                val playlistId = repository.createPlaylist(name = album.name)
+                // 1. Create playlist with album name (Artist - Album)
+                val playlistName = "${album.artist} - ${album.name}"
+                val playlistId = repository.createPlaylist(name = playlistName)
                 
-                // 2. Get all songs from this album
-                val albumSongs = repository.getSongsByAlbumId(album.id)
+                // 2. Get all songs from this album (by name, to catch merged albums)
+                val albumSongs = repository.getSongsByAlbumName(album.name)
                 
                 // 3. Add all songs to the new playlist
                 albumSongs.forEach { song ->

@@ -5,5 +5,6 @@ data class Album(
     val name: String,
     val artist: String,
     val coverUri: String? = null,
+    val covers: List<String> = emptyList(),
     val songCount: Int = 0
 )

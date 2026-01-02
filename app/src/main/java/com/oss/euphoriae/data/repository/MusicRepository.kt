@@ -10,6 +10,7 @@ import com.oss.euphoriae.data.model.PlaylistSong
 import com.oss.euphoriae.data.model.Song
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class MusicRepository(
@@ -49,9 +50,37 @@ class MusicRepository(
     
     fun getSongsInPlaylist(playlistId: Long): Flow<List<Song>> = musicDao.getSongsInPlaylist(playlistId)
     
-    fun getAlbums(): Flow<List<com.oss.euphoriae.data.model.Album>> = musicDao.getAlbums()
+    fun getAlbums(): Flow<List<com.oss.euphoriae.data.model.Album>> {
+        return musicDao.getAllSongs().map { songs ->
+            songs.groupBy { it.album }
+                .map { (albumName, albumSongs) ->
+                    val distinctCovers = albumSongs
+                        .mapNotNull { it.albumArtUri }
+                        .filter { it.isNotEmpty() }
+                        .distinct()
+                    
+                    val representativeSong = albumSongs.first()
+                    // If multiple artists, maybe show "Various Artists"? For now, just taking the first one or primary one.
+                    // To handle "Artist A" vs "Artist A feat B", maybe find the most common artist?
+                    val artists = albumSongs.map { it.artist }.distinct()
+                    val primaryArtist = if (artists.size > 1) "Various Artists" else representativeSong.artist
+                    
+                    com.oss.euphoriae.data.model.Album(
+                        id = representativeSong.albumId, // Use the first albumId we find
+                        name = albumName,
+                        artist = primaryArtist,
+                        coverUri = distinctCovers.firstOrNull(),
+                        covers = distinctCovers.take(4), // Take up to 4 for the grid
+                        songCount = albumSongs.size
+                    )
+                }
+                .sortedBy { it.name }
+        }
+    }
     
     suspend fun getSongsByAlbumId(albumId: Long): List<Song> = musicDao.getSongsByAlbumId(albumId)
+    
+    suspend fun getSongsByAlbumName(albumName: String): List<Song> = musicDao.getSongsByAlbumName(albumName)
 
     suspend fun scanAndImportMusic(): Int = withContext(Dispatchers.IO) {
         val songs = mutableListOf<Song>()
