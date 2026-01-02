@@ -57,7 +57,7 @@ class NativeRenderersFactory(
         nativeAudioProcessor = NativeAudioProcessor(audioEngine)
         
         val audioSink = DefaultAudioSink.Builder(context)
-            .setEnableFloatOutput(enableFloatOutput)
+            .setEnableFloatOutput(enableFloatOutput) // Revert forced Float to prevent crash with Sonic/TimeStretch
             .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
             .setAudioProcessors(arrayOf(nativeAudioProcessor!!))
             .build()

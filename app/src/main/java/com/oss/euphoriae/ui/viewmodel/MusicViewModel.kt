@@ -20,6 +20,7 @@ import com.oss.euphoriae.EuphoriaeApp
 import com.oss.euphoriae.data.`class`.AudioEffectsManager
 import com.oss.euphoriae.data.model.Playlist
 import com.oss.euphoriae.data.model.Song
+import com.oss.euphoriae.engine.AudioEngine
 import com.oss.euphoriae.service.MusicPlaybackService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -43,7 +44,9 @@ data class MusicUiState(
     val error: String? = null,
     val searchQuery: String = "",
     val isShuffleOn: Boolean = false,
-    val repeatMode: Int = 0
+    val repeatMode: Int = 0,
+    val tempo: Float = 1.0f,
+    val pitch: Float = 0.0f
 )
 
 class MusicViewModel(application: Application) : AndroidViewModel(application) {
@@ -52,6 +55,11 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     
     val audioEffectsManager = AudioEffectsManager()
     private var audioEffectsInitialized = false
+    
+    // Native audio engine - create our own instance for UI control
+    private var _audioEngine: AudioEngine? = null
+    val audioEngine: AudioEngine?
+        get() = _audioEngine
     
     private var controllerFuture: ListenableFuture<MediaController>? = null
     private var mediaController: MediaController? = null
@@ -100,9 +108,21 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     }
     
     init {
+        initializeAudioEngine()
         loadSongs()
         loadPlaylists()
         connectToService()
+    }
+    
+    private fun initializeAudioEngine() {
+        try {
+            _audioEngine = AudioEngine.getInstance().apply {
+                create()
+            }
+            android.util.Log.i("MusicViewModel", "AudioEngine singleton obtained for effects control")
+        } catch (e: Exception) {
+            android.util.Log.e("MusicViewModel", "Failed to get AudioEngine", e)
+        }
     }
     
     private fun connectToService() {
@@ -297,6 +317,28 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             controller.pause()
         } else {
             controller.play()
+        }
+    }
+
+    fun setPlaybackParameters(tempo: Float, pitch: Float) {
+        try {
+            mediaController?.let { controller ->
+                // Pitch in ExoPlayer is a factor (1.0 = normal), but our UI sends semitones (-12 to +12).
+                // Convert semitones to factor: factor = 2^(semitones/12)
+                val pitchFactor = java.lang.Math.pow(2.0, pitch.toDouble() / 12.0).toFloat()
+                
+                // Ensure tempo and pitch are positive to avoid IllegalArgumentException
+                val safeTempo = tempo.coerceAtLeast(0.1f)
+                val safePitch = pitchFactor.coerceAtLeast(0.1f)
+                
+                val params = androidx.media3.common.PlaybackParameters(safeTempo, safePitch)
+                controller.playbackParameters = params
+                
+                // Update UI state with the original semitone value for sliders
+                _uiState.update { it.copy(tempo = tempo, pitch = pitch) }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MusicViewModel", "Failed to set playback parameters", e)
         }
     }
     
@@ -528,6 +570,8 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         stopProgressUpdates()
         mediaController?.removeListener(playerListener)
         audioEffectsManager.release()
+        // Note: Don't destroy audioEngine here - it's a singleton managed by the service
+        _audioEngine = null
         controllerFuture?.let { MediaController.releaseFuture(it) }
     }
 }

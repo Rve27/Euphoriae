@@ -2,8 +2,12 @@ package com.oss.euphoriae.data.`class`
 
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
+import android.media.audiofx.LoudnessEnhancer
+import android.media.audiofx.PresetReverb
 import android.media.audiofx.Virtualizer
+import android.os.Build
 import android.util.Log
+import com.oss.euphoriae.data.preferences.ReverbPreset
 import com.oss.euphoriae.engine.AudioEngine
 
 class AudioEffectsManager {
@@ -11,6 +15,8 @@ class AudioEffectsManager {
     private var equalizer: Equalizer? = null
     private var bassBoost: BassBoost? = null
     private var virtualizer: Virtualizer? = null
+    private var presetReverb: PresetReverb? = null
+    private var loudnessEnhancer: LoudnessEnhancer? = null
     
     private var audioSessionId: Int = 0
     private var isEnabled: Boolean = true
@@ -19,6 +25,12 @@ class AudioEffectsManager {
     
     private var bassBoostLevel: Float = 0f
     private var virtualizerLevel: Float = 0f
+    
+    // DSP settings
+    private var reverbPreset: ReverbPreset = ReverbPreset.NONE
+    private var loudnessGain: Float = 0f  // 0 to 1
+    private var stereoBalance: Float = 0f  // -1 (left) to 1 (right)
+    private var channelSeparation: Float = 0.5f  // 0 to 1
     
     // Native audio engine reference
     private var nativeEngine: AudioEngine? = null
@@ -50,6 +62,30 @@ class AudioEffectsManager {
                 enabled = isEnabled
                 if (getStrengthSupported()) {
                     setStrength((virtualizerLevel * 1000).toInt().toShort())
+                }
+            }
+            
+            // Initialize PresetReverb
+            try {
+                presetReverb = PresetReverb(0, audioSessionId).apply {
+                    enabled = isEnabled && reverbPreset != ReverbPreset.NONE
+                    preset = reverbPreset.value
+                }
+                Log.d(TAG, "PresetReverb initialized")
+            } catch (e: Exception) {
+                Log.w(TAG, "PresetReverb not supported", e)
+            }
+            
+            // Initialize LoudnessEnhancer (API 19+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                try {
+                    loudnessEnhancer = LoudnessEnhancer(audioSessionId).apply {
+                        enabled = isEnabled && loudnessGain > 0
+                        setTargetGain((loudnessGain * 1000).toInt())  // mB (millibels)
+                    }
+                    Log.d(TAG, "LoudnessEnhancer initialized")
+                } catch (e: Exception) {
+                    Log.w(TAG, "LoudnessEnhancer not supported", e)
                 }
             }
             
@@ -201,6 +237,66 @@ class AudioEffectsManager {
     
     fun getVirtualizerLevel(): Float = virtualizerLevel
     
+    // ================== DSP Settings ==================
+    
+    fun setReverbPreset(preset: ReverbPreset) {
+        reverbPreset = preset
+        try {
+            presetReverb?.apply {
+                this.preset = preset.value
+                enabled = isEnabled && preset != ReverbPreset.NONE
+            }
+            Log.d(TAG, "Reverb preset set to: ${preset.displayName}")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to set reverb preset", e)
+        }
+    }
+    
+    fun getReverbPreset(): ReverbPreset = reverbPreset
+    
+    fun setLoudnessGain(gain: Float) {
+        loudnessGain = gain.coerceIn(0f, 1f)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                loudnessEnhancer?.apply {
+                    setTargetGain((loudnessGain * 1000).toInt())  // Convert to millibels
+                    enabled = isEnabled && loudnessGain > 0
+                }
+            }
+            Log.d(TAG, "Loudness gain set to: ${(loudnessGain * 100).toInt()}%")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to set loudness gain", e)
+        }
+    }
+    
+    fun getLoudnessGain(): Float = loudnessGain
+    
+    fun setStereoBalance(balance: Float) {
+        stereoBalance = balance.coerceIn(-1f, 1f)
+        // Stereo balance is applied through native engine or virtualizer manipulation
+        // For now, we store the value and can apply it in the audio processor
+        Log.d(TAG, "Stereo balance set to: $stereoBalance")
+    }
+    
+    fun getStereoBalance(): Float = stereoBalance
+    
+    fun setChannelSeparation(separation: Float) {
+        channelSeparation = separation.coerceIn(0f, 1f)
+        // Channel separation affects stereo width
+        // Can be applied via virtualizer or native engine
+        Log.d(TAG, "Channel separation set to: ${(channelSeparation * 100).toInt()}%")
+    }
+    
+    fun getChannelSeparation(): Float = channelSeparation
+    
+    fun getAudioSessionId(): Int = audioSessionId
+    
+    fun isReverbSupported(): Boolean = presetReverb != null
+    
+    fun isLoudnessEnhancerSupported(): Boolean = loudnessEnhancer != null
+    
+    // ================== Preset & Reset ==================
+    
     fun applyPreset(presetName: String): Boolean {
         val presetLevels = PRESETS[presetName] ?: return false
         setAllBandLevels(presetLevels)
@@ -215,6 +311,18 @@ class AudioEffectsManager {
         setVirtualizerLevel(0f)
     }
     
+    fun resetDacSettings() {
+        setReverbPreset(ReverbPreset.NONE)
+        setLoudnessGain(0f)
+        setStereoBalance(0f)
+        setChannelSeparation(0.5f)
+    }
+    
+    fun resetAll() {
+        reset()
+        resetDacSettings()
+    }
+    
     private fun applyBandLevels() {
         bandLevels.forEachIndexed { index, level ->
             setBandLevel(index, level)
@@ -226,12 +334,18 @@ class AudioEffectsManager {
             equalizer?.release()
             bassBoost?.release()
             virtualizer?.release()
+            presetReverb?.release()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                loudnessEnhancer?.release()
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to release audio effects", e)
         }
         equalizer = null
         bassBoost = null
         virtualizer = null
+        presetReverb = null
+        loudnessEnhancer = null
         nativeEngine = null
     }
     

@@ -26,11 +26,13 @@ static std::unique_ptr<euphoriae::AudioEngine> sEngine;
 
 extern "C" {
 
+// ================== Core ==================
+
 JNIEXPORT void JNICALL
 Java_com_oss_euphoriae_engine_AudioEngine_nativeCreate(JNIEnv *env, jobject thiz) {
     if (!sEngine) {
         sEngine = std::make_unique<euphoriae::AudioEngine>();
-        LOGI("Native AudioEngine instance created");
+        LOGI("Native AudioEngine instance created with full DSP");
     }
 }
 
@@ -54,37 +56,106 @@ Java_com_oss_euphoriae_engine_AudioEngine_nativeProcessAudio(
     
     sEngine->processAudio(buffer, numFrames, channelCount);
     
-    // Copy back the modified buffer
     env->ReleaseFloatArrayElements(audioBuffer, buffer, 0);
 }
 
+// ================== Basic Effects ==================
+
 JNIEXPORT void JNICALL
 Java_com_oss_euphoriae_engine_AudioEngine_nativeSetVolume(JNIEnv *env, jobject thiz, jfloat volume) {
-    if (sEngine) {
-        sEngine->setVolume(volume);
-    }
+    if (sEngine) sEngine->setVolume(volume);
 }
 
 JNIEXPORT void JNICALL
 Java_com_oss_euphoriae_engine_AudioEngine_nativeSetBassBoost(JNIEnv *env, jobject thiz, jfloat strength) {
-    if (sEngine) {
-        sEngine->setBassBoost(strength);
-    }
+    if (sEngine) sEngine->setBassBoost(strength);
 }
 
 JNIEXPORT void JNICALL
 Java_com_oss_euphoriae_engine_AudioEngine_nativeSetVirtualizer(JNIEnv *env, jobject thiz, jfloat strength) {
-    if (sEngine) {
-        sEngine->setVirtualizer(strength);
-    }
+    if (sEngine) sEngine->setVirtualizer(strength);
 }
 
 JNIEXPORT void JNICALL
 Java_com_oss_euphoriae_engine_AudioEngine_nativeSetEqualizerBand(JNIEnv *env, jobject thiz, jint band, jfloat gain) {
-    if (sEngine) {
-        sEngine->setEqualizerBand(band, gain);
-    }
+    if (sEngine) sEngine->setEqualizerBand(band, gain);
 }
+
+// ================== Advanced Effects ==================
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetCompressor(JNIEnv *env, jobject thiz, jfloat strength) {
+    if (sEngine) sEngine->setCompressorStrength(strength);
+}
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetLimiter(JNIEnv *env, jobject thiz, jfloat ceiling) {
+    if (sEngine) sEngine->setLimiter(ceiling);
+}
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetSurround3D(JNIEnv *env, jobject thiz, jfloat depth) {
+    if (sEngine) sEngine->setSurround3D(depth);
+}
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetRoomSize(JNIEnv *env, jobject thiz, jfloat size) {
+    if (sEngine) sEngine->setRoomSize(size);
+}
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetSurroundLevel(JNIEnv *env, jobject thiz, jfloat level) {
+    if (sEngine) sEngine->setSurroundLevel(level);
+}
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetHeadphoneSurround(JNIEnv *env, jobject thiz, jboolean enabled) {
+    if (sEngine) sEngine->setHeadphoneSurround(enabled);
+}
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetHeadphoneType(JNIEnv *env, jobject thiz, jint type) {
+    if (sEngine) sEngine->setHeadphoneType(type);
+}
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetClarity(JNIEnv *env, jobject thiz, jfloat level) {
+    if (sEngine) sEngine->setClarity(level);
+}
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetTubeWarmth(JNIEnv *env, jobject thiz, jfloat warmth) {
+    if (sEngine) sEngine->setTubeWarmth(warmth);
+}
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetSpectrumExtension(JNIEnv *env, jobject thiz, jfloat level) {
+    if (sEngine) sEngine->setSpectrumExtension(level);
+}
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetTrebleBoost(JNIEnv *env, jobject thiz, jfloat level) {
+    if (sEngine) sEngine->setTrebleBoost(level);
+}
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetVolumeLeveler(JNIEnv *env, jobject thiz, jfloat level) {
+    if (sEngine) sEngine->setVolumeLeveler(level);
+}
+
+// ================== Stereo ==================
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetStereoBalance(JNIEnv *env, jobject thiz, jfloat balance) {
+    if (sEngine) sEngine->setStereoBalance(balance);
+}
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetChannelSeparation(JNIEnv *env, jobject thiz, jfloat separation) {
+    if (sEngine) sEngine->setChannelSeparation(separation);
+}
+
+// ================== Getters ==================
 
 JNIEXPORT jfloat JNICALL
 Java_com_oss_euphoriae_engine_AudioEngine_nativeGetVolume(JNIEnv *env, jobject thiz) {
@@ -99,6 +170,52 @@ Java_com_oss_euphoriae_engine_AudioEngine_nativeGetBassBoost(JNIEnv *env, jobjec
 JNIEXPORT jfloat JNICALL
 Java_com_oss_euphoriae_engine_AudioEngine_nativeGetVirtualizer(JNIEnv *env, jobject thiz) {
     return sEngine ? sEngine->getVirtualizer() : 0.0f;
+}
+
+JNIEXPORT jfloat JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeGetCompressor(JNIEnv *env, jobject thiz) {
+    return sEngine ? sEngine->getCompressor() : 0.0f;
+}
+
+JNIEXPORT jfloat JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeGetClarity(JNIEnv *env, jobject thiz) {
+    return sEngine ? sEngine->getClarity() : 0.0f;
+}
+
+JNIEXPORT jfloat JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeGetTubeWarmth(JNIEnv *env, jobject thiz) {
+    return sEngine ? sEngine->getTubeWarmth() : 0.0f;
+}
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetReverb(JNIEnv *env, jobject thiz, jint preset, jfloat wetMix) {
+    if (sEngine) sEngine->setReverb(preset, wetMix);
+}
+
+JNIEXPORT jint JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeGetReverbPreset(JNIEnv *env, jobject thiz) {
+    return sEngine ? sEngine->getReverbPreset() : 0;
+}
+
+// Tempo/Pitch
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetTempo(JNIEnv *env, jobject thiz, jfloat tempo) {
+    if (sEngine) sEngine->setTempo(tempo);
+}
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetPitch(JNIEnv *env, jobject thiz, jfloat semitones) {
+    if (sEngine) sEngine->setPitch(semitones);
+}
+
+JNIEXPORT jfloat JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeGetTempo(JNIEnv *env, jobject thiz) {
+    return sEngine ? sEngine->getTempo() : 1.0f;
+}
+
+JNIEXPORT jfloat JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeGetPitch(JNIEnv *env, jobject thiz) {
+    return sEngine ? sEngine->getPitch() : 0.0f;
 }
 
 } // extern "C"

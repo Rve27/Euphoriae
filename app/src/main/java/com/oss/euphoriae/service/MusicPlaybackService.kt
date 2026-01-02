@@ -29,6 +29,7 @@ class MusicPlaybackService : MediaSessionService() {
     companion object {
         private const val NOTIFICATION_CHANNEL_ID = "euphoriae_playback_channel"
         private const val TAG = "MusicPlaybackService"
+        var crossfadeDurationMs: Long = 0  // 0 = disabled, up to 12000ms
     }
     
     override fun onCreate() {
@@ -70,10 +71,10 @@ class MusicPlaybackService : MediaSessionService() {
     
     private fun initializeAudioEngine() {
         try {
-            audioEngine = AudioEngine().apply {
+            audioEngine = AudioEngine.getInstance().apply {
                 create()
             }
-            Log.d(TAG, "Native AudioEngine initialized")
+            Log.d(TAG, "Native AudioEngine singleton initialized")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize native AudioEngine", e)
         }

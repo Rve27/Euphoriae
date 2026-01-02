@@ -45,6 +45,7 @@ import com.oss.euphoriae.ui.screens.SettingsScreen
 import com.oss.euphoriae.ui.screens.SongsScreen
 import com.oss.euphoriae.ui.theme.EuphoriaeTheme
 import com.oss.euphoriae.ui.viewmodel.MusicViewModel
+import com.oss.euphoriae.engine.AudioEngine
 
 class MainActivity : ComponentActivity() {
     
@@ -218,6 +219,8 @@ fun EuphoriaeMainApp(
                 onLoadPlaylistSongs = { viewModel.loadPlaylistSongs(it) },
                 playlistSongs = uiState.playlistSongs,
                 audioEffectsManager = viewModel.audioEffectsManager,
+                audioEngine = viewModel.audioEngine,
+                onPlaybackParamsChange = { t, p -> viewModel.setPlaybackParameters(t, p) },
                 currentThemeColor = currentThemeColor,
                 onThemeColorChange = { option ->
                     themePreferences.setThemeColor(option)
@@ -245,6 +248,8 @@ fun AppNavHost(
     onLoadPlaylistSongs: (Long) -> Unit,
     playlistSongs: List<Song>,
     audioEffectsManager: com.oss.euphoriae.data.`class`.AudioEffectsManager,
+    audioEngine: AudioEngine?,
+    onPlaybackParamsChange: (Float, Float) -> Unit,
     currentThemeColor: ThemeColorOption,
     onThemeColorChange: (ThemeColorOption) -> Unit,
     currentDarkMode: DarkModeOption,
@@ -304,7 +309,11 @@ fun AppNavHost(
             }
         }
         composable(Destination.EQUALIZER.route) {
-            EqualizerScreen(audioEffectsManager = audioEffectsManager)
+            EqualizerScreen(
+                audioEffectsManager = audioEffectsManager,
+                audioEngine = audioEngine,
+                onPlaybackParamsChange = onPlaybackParamsChange
+            )
         }
         composable("settings") {
             SettingsScreen(
