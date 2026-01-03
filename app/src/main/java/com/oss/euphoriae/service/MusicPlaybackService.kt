@@ -19,6 +19,7 @@ import com.oss.euphoriae.MainActivity
 import com.oss.euphoriae.engine.AudioEngine
 import com.oss.euphoriae.engine.NativeAudioProcessor
 import com.oss.euphoriae.engine.NativeRenderersFactory
+import com.oss.euphoriae.widget.WidgetQueueManager
 import com.oss.euphoriae.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -107,24 +108,67 @@ class MusicPlaybackService : MediaSessionService() {
                 }
             }
             ACTION_NEXT -> {
-                player?.let {
-                    if (it.hasNextMediaItem()) {
-                        it.seekToNext()
-                    }
+                serviceScope.launch {
+                    playNextFromQueue()
                 }
             }
             ACTION_PREVIOUS -> {
-                player?.let {
-                    if (it.currentPosition > 3000) {
-                        it.seekTo(0)
-                    } else if (it.hasPreviousMediaItem()) {
-                        it.seekToPrevious()
-                    }
+                serviceScope.launch {
+                    playPreviousFromQueue()
                 }
             }
         }
         
         return result
+    }
+    
+    private suspend fun playNextFromQueue() {
+        val nextSong = WidgetQueueManager.getNextSong(this)
+        if (nextSong != null) {
+            val (songInfo, newIndex) = nextSong
+            playSongFromQueue(songInfo, newIndex)
+        }
+    }
+    
+    private suspend fun playPreviousFromQueue() {
+        val currentPlayer = player ?: return
+        
+        // If more than 3 seconds into song, restart it
+        if (currentPlayer.currentPosition > 3000) {
+            currentPlayer.seekTo(0)
+            return
+        }
+        
+        val prevSong = WidgetQueueManager.getPreviousSong(this)
+        if (prevSong != null) {
+            val (songInfo, newIndex) = prevSong
+            playSongFromQueue(songInfo, newIndex)
+        }
+    }
+    
+    private suspend fun playSongFromQueue(songInfo: com.oss.euphoriae.widget.QueueSongInfo, index: Int) {
+        val currentPlayer = player ?: return
+        
+        val contentUri = WidgetQueueManager.getSongContentUri(songInfo.id)
+        
+        val mediaItem = androidx.media3.common.MediaItem.Builder()
+            .setUri(contentUri)
+            .setMediaMetadata(
+                androidx.media3.common.MediaMetadata.Builder()
+                    .setTitle(songInfo.title)
+                    .setArtist(songInfo.artist)
+                    .setAlbumTitle(songInfo.album)
+                    .setArtworkUri(songInfo.albumArtUri?.let { android.net.Uri.parse(it) })
+                    .build()
+            )
+            .build()
+        
+        currentPlayer.setMediaItem(mediaItem)
+        currentPlayer.prepare()
+        currentPlayer.play()
+        
+        // Update the current index in queue
+        WidgetQueueManager.updateCurrentIndex(this, index)
     }
     
     private fun initializeAudioEngine() {

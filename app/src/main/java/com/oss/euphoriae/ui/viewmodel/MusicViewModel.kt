@@ -23,6 +23,8 @@ import com.oss.euphoriae.data.model.Playlist
 import com.oss.euphoriae.data.model.Song
 import com.oss.euphoriae.engine.AudioEngine
 import com.oss.euphoriae.service.MusicPlaybackService
+import com.oss.euphoriae.widget.QueueSongInfo
+import com.oss.euphoriae.widget.WidgetQueueManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -300,6 +302,9 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         controller.setMediaItem(mediaItem)
         controller.prepare()
         controller.play()
+        
+        // Save queue for widget navigation
+        saveQueueForWidget(songs, songIndex)
     }
     
     fun playSongFromList(song: Song, songList: List<Song>) {
@@ -339,6 +344,9 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         controller.setMediaItem(mediaItem)
         controller.prepare()
         controller.play()
+        
+        // Save queue for widget navigation
+        saveQueueForWidget(songList, if (songIndex >= 0) songIndex else 0)
     }
     
     fun togglePlayPause() {
@@ -630,6 +638,22 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             repository.getAlbums().collect { albums ->
                 _uiState.update { it.copy(albums = albums) }
             }
+        }
+    }
+    
+    private fun saveQueueForWidget(songs: List<Song>, currentIndex: Int) {
+        viewModelScope.launch {
+            val queueInfo = songs.map { song ->
+                QueueSongInfo(
+                    id = song.id,
+                    title = song.title,
+                    artist = song.artist,
+                    album = song.album,
+                    albumArtUri = song.albumArtUri,
+                    duration = song.duration
+                )
+            }
+            WidgetQueueManager.saveQueue(getApplication(), queueInfo, currentIndex)
         }
     }
     
