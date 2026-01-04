@@ -253,7 +253,7 @@ fun EqualizerScreen(
                 title = {
                     Column {
                         Text(
-                            text = "Audio Engine",
+                            text = "Equalizer",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
