@@ -109,3 +109,5 @@
     - Controls compressor threshold and ratio for consistent loudness
 - fix: Integrate Loudness Gain to native engine
     - Applies makeup gain (up to +6dB) after compression
+- fix: Playlist shows 0 songs despite having music
+    - Fixed Playlist model constructor to properly store songCount and covers
