@@ -92,6 +92,16 @@ void AudioEngine::processAudio(float* buffer, int32_t numFrames, int32_t channel
         applyCompressor(buffer, numFrames, channelCount);
     }
     
+    // 8.25 Loudness Gain (makeup gain after compression)
+    float loudnessGain = mLoudnessGain.load();
+    if (loudnessGain > 0.01f) {
+        float gainFactor = 1.0f + (loudnessGain * 1.5f);  // Up to +6dB gain
+        int numSamples = numFrames * channelCount;
+        for (int32_t i = 0; i < numSamples; i++) {
+            buffer[i] *= gainFactor;
+        }
+    }
+    
     // 8.5 Reverb
     int reverbPreset = mReverbPreset.load();
     if (reverbPreset > 0) {
@@ -282,6 +292,22 @@ void AudioEngine::setPitch(float semitones) {
     mPitchSemitones.store(std::clamp(semitones, -12.0f, 12.0f));
     // Convert semitones to pitch ratio: 2^(semitones/12)
     mPitchRatio = std::pow(2.0f, semitones / 12.0f);
+}
+
+void AudioEngine::setDynamicRange(float range) {
+    mDynamicRange.store(std::clamp(range, 0.0f, 1.0f));
+    // Lower dynamic range = more compression
+    // Adjust compressor settings based on dynamic range
+    float compressionAmount = 1.0f - range;
+    if (compressionAmount > 0.01f) {
+        mCompressorStrength.store(compressionAmount * 0.7f);
+        mCompressorThreshold.store(-20.0f + (range * 10.0f));  // -20 to -10 dB
+        mCompressorRatio.store(1.0f + ((1.0f - range) * 7.0f));  // 1:1 to 8:1
+    }
+}
+
+void AudioEngine::setLoudnessGain(float gain) {
+    mLoudnessGain.store(std::clamp(gain, 0.0f, 1.0f));
 }
 
 // ================== DSP Algorithm Implementations ==================

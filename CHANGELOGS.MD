@@ -105,3 +105,7 @@
 - feat: Implement Surround Mode presets (Off, Music, Movie, Game, Podcast)
     - Each mode auto-applies optimized 3D effect, room size, and surround level
     - Game mode auto-enables headphone surround for precise positioning
+- fix: Integrate Dynamic Range control to native engine
+    - Controls compressor threshold and ratio for consistent loudness
+- fix: Integrate Loudness Gain to native engine
+    - Applies makeup gain (up to +6dB) after compression

@@ -229,7 +229,8 @@ fun EqualizerScreen(
         compressor = 0f; audioPreferences?.setCompressor(0f); audioEngine?.setCompressor(0f)
         volumeLeveler = 0f; audioPreferences?.setVolumeLeveler(0f); audioEngine?.setVolumeLeveler(0f)
         limiter = 0f; audioPreferences?.setLimiter(0f); audioEngine?.setLimiter(0.99f)
-        dynamicRange = 1f; audioPreferences?.setDynamicRange(1f)
+        dynamicRange = 1f; audioPreferences?.setDynamicRange(1f); audioEngine?.setDynamicRange(1f)
+        loudnessGain = 0f; audioPreferences?.setLoudnessGain(0f); audioEngine?.setLoudnessGain(0f)
         clarity = 0f; audioPreferences?.setClarity(0f); audioEngine?.setClarity(0f)
         spectrumExtension = 0f; audioPreferences?.setSpectrumExtension(0f); audioEngine?.setSpectrumExtension(0f)
         tubeAmp = 0f; audioPreferences?.setTubeAmp(0f); audioEngine?.setTubeWarmth(0f)
@@ -503,6 +504,7 @@ fun EqualizerScreen(
                         loudnessGain = it
                         audioPreferences?.setLoudnessGain(it)
                         audioEffectsManager?.setLoudnessGain(it)
+                        audioEngine?.setLoudnessGain(it)
                     },
                     enabled = isEnabled,
                     icon = Icons.Default.VolumeUp,
@@ -755,6 +757,7 @@ fun EqualizerScreen(
                     onValueChange = { 
                         dynamicRange = it
                         audioPreferences?.setDynamicRange(it)
+                        audioEngine?.setDynamicRange(it)
                     },
                     enabled = isEnabled,
                     icon = Icons.Default.SwapVert,

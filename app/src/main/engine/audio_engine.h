@@ -59,6 +59,8 @@ public:
     void setChannelSeparation(float separation);
     void setTrebleBoost(float level);
     void setVolumeLeveler(float level);
+    void setDynamicRange(float range);       // 0 to 1 (1 = full range)
+    void setLoudnessGain(float gain);        // 0 to 1
     void setReverb(int preset, float wetMix);  // preset 0-6, wetMix 0-1
     
     // Time stretching / Pitch shifting
@@ -133,6 +135,8 @@ private:
     
     std::atomic<float> mStereoBalance{0.0f};
     std::atomic<float> mChannelSeparation{0.5f};
+    std::atomic<float> mDynamicRange{1.0f};   // 0 to 1 (1 = full range, 0 = compressed)
+    std::atomic<float> mLoudnessGain{0.0f};   // 0 to 1 (loudness enhancement)
     
     // Reverb
     std::atomic<int> mReverbPreset{0};  // 0=None, 1=SmallRoom, 2=MediumRoom, 3=LargeRoom, 4=MediumHall, 5=LargeHall, 6=Plate

@@ -119,6 +119,14 @@ class AudioEngine private constructor() {
         if (isCreated) nativeSetVolumeLeveler(level.coerceIn(0f, 1f))
     }
 
+    fun setDynamicRange(range: Float) {
+        if (isCreated) nativeSetDynamicRange(range.coerceIn(0f, 1f))
+    }
+
+    fun setLoudnessGain(gain: Float) {
+        if (isCreated) nativeSetLoudnessGain(gain.coerceIn(0f, 1f))
+    }
+
     // ================== Surround / Spatial ==================
 
     fun setSurround3D(depth: Float) {
@@ -213,6 +221,8 @@ class AudioEngine private constructor() {
     private external fun nativeSetVolumeLeveler(level: Float)
     private external fun nativeSetStereoBalance(balance: Float)
     private external fun nativeSetChannelSeparation(separation: Float)
+    private external fun nativeSetDynamicRange(range: Float)
+    private external fun nativeSetLoudnessGain(gain: Float)
     private external fun nativeGetCompressor(): Float
     private external fun nativeGetClarity(): Float
     private external fun nativeGetTubeWarmth(): Float

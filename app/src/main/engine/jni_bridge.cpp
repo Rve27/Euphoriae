@@ -160,6 +160,16 @@ Java_com_oss_euphoriae_engine_AudioEngine_nativeSetChannelSeparation(JNIEnv *env
     if (sEngine) sEngine->setChannelSeparation(separation);
 }
 
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetDynamicRange(JNIEnv *env, jobject thiz, jfloat range) {
+    if (sEngine) sEngine->setDynamicRange(range);
+}
+
+JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetLoudnessGain(JNIEnv *env, jobject thiz, jfloat gain) {
+    if (sEngine) sEngine->setLoudnessGain(gain);
+}
+
 // ================== Getters ==================
 
 JNIEXPORT jfloat JNICALL

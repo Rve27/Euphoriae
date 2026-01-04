@@ -215,6 +215,8 @@ class MusicPlaybackService : MediaSessionService() {
         engine.setCompressor(prefs.getCompressor())
         engine.setVolumeLeveler(prefs.getVolumeLeveler())
         engine.setLimiter(0.99f - (prefs.getLimiter() * 0.49f))
+        engine.setDynamicRange(prefs.getDynamicRange())
+        engine.setLoudnessGain(prefs.getLoudnessGain())
         
         // Apply enhancement
         engine.setClarity(prefs.getClarity())
