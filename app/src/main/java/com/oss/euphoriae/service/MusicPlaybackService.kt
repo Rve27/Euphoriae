@@ -202,6 +202,7 @@ class MusicPlaybackService : MediaSessionService() {
         // Apply surround settings
         engine.setStereoBalance(prefs.getStereoBalance())
         engine.setChannelSeparation(prefs.getChannelSeparation())
+        engine.setSurroundMode(prefs.getSurroundMode().ordinal)  // Apply mode preset
         engine.setSurroundLevel(prefs.getSurroundLevel())
         engine.setRoomSize(prefs.getRoomSize())
         engine.setSurround3D(prefs.get3DEffect())

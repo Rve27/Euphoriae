@@ -133,6 +133,14 @@ class AudioEngine private constructor() {
         if (isCreated) nativeSetSurroundLevel(level.coerceIn(0f, 1f))
     }
 
+    /**
+     * Set surround mode with automatic preset configuration
+     * @param mode 0=Off, 1=Music, 2=Movie, 3=Game, 4=Podcast
+     */
+    fun setSurroundMode(mode: Int) {
+        if (isCreated) nativeSetSurroundMode(mode.coerceIn(0, 4))
+    }
+
     fun setHeadphoneSurround(enabled: Boolean) {
         if (isCreated) nativeSetHeadphoneSurround(enabled)
     }
@@ -209,6 +217,7 @@ class AudioEngine private constructor() {
     private external fun nativeGetClarity(): Float
     private external fun nativeGetTubeWarmth(): Float
     private external fun nativeSetSurroundLevel(level: Float)
+    private external fun nativeSetSurroundMode(mode: Int)
     private external fun nativeSetHeadphoneSurround(enabled: Boolean)
     private external fun nativeSetHeadphoneType(type: Int)
     private external fun nativeSetReverb(preset: Int, wetMix: Float)

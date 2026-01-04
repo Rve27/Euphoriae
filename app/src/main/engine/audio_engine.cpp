@@ -202,6 +202,42 @@ void AudioEngine::setSurroundLevel(float level) {
     mSurroundLevel.store(std::clamp(level, 0.0f, 1.0f));
 }
 
+void AudioEngine::setSurroundMode(int mode) {
+    mSurroundMode.store(std::clamp(mode, 0, 4));
+    
+    // Apply mode-specific presets
+    switch (mode) {
+        case 0:  // Off - disable surround processing
+            mSurround3D.store(0.0f);
+            break;
+            
+        case 1:  // Music - balanced stereo widening with warmth
+            mSurround3D.store(0.4f);
+            mRoomSize.store(0.3f);
+            mSurroundLevel.store(0.5f);
+            break;
+            
+        case 2:  // Movie - immersive with larger room
+            mSurround3D.store(0.7f);
+            mRoomSize.store(0.7f);
+            mSurroundLevel.store(0.6f);
+            break;
+            
+        case 3:  // Game - precise positioning, less reverb
+            mSurround3D.store(0.8f);
+            mRoomSize.store(0.4f);
+            mSurroundLevel.store(0.7f);
+            mHeadphoneSurround.store(true);
+            break;
+            
+        case 4:  // Podcast - subtle spatialization, voice focus
+            mSurround3D.store(0.2f);
+            mRoomSize.store(0.2f);
+            mSurroundLevel.store(0.3f);
+            break;
+    }
+}
+
 void AudioEngine::setHeadphoneSurround(bool enabled) {
     mHeadphoneSurround.store(enabled);
 }

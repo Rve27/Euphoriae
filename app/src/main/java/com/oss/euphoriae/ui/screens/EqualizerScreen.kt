@@ -537,6 +537,27 @@ fun EqualizerScreen(
                             onClick = { 
                                 surroundMode = mode
                                 audioPreferences?.setSurroundMode(mode)
+                                audioEngine?.setSurroundMode(mode.ordinal)
+                                
+                                // Update UI sliders to reflect new mode values
+                                when (mode) {
+                                    SurroundMode.OFF -> {
+                                        effect3d = 0f
+                                    }
+                                    SurroundMode.MUSIC -> {
+                                        effect3d = 0.4f; roomSize = 0.3f; surroundLevel = 0.5f
+                                    }
+                                    SurroundMode.MOVIE -> {
+                                        effect3d = 0.7f; roomSize = 0.7f; surroundLevel = 0.6f
+                                    }
+                                    SurroundMode.GAME -> {
+                                        effect3d = 0.8f; roomSize = 0.4f; surroundLevel = 0.7f
+                                        headphoneSurround = true
+                                    }
+                                    SurroundMode.PODCAST -> {
+                                        effect3d = 0.2f; roomSize = 0.2f; surroundLevel = 0.3f
+                                    }
+                                }
                             },
                             label = { Text(mode.displayName, style = MaterialTheme.typography.labelSmall) },
                             modifier = Modifier.weight(1f),

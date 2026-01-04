@@ -49,6 +49,7 @@ public:
     void setSurround3D(float depth);
     void setRoomSize(float size);
     void setSurroundLevel(float level);  // Overall surround mix
+    void setSurroundMode(int mode);      // 0=Off, 1=Music, 2=Movie, 3=Game, 4=Podcast
     void setHeadphoneSurround(bool enabled);  // Toggle headphone surround
     void setHeadphoneType(int type);  // 0=Generic, 1=InEar, 2=OverEar, 3=OpenBack, 4=Studio
     void setClarity(float level);
@@ -119,6 +120,7 @@ private:
     std::atomic<float> mSurround3D{0.0f};
     std::atomic<float> mRoomSize{0.5f};
     std::atomic<float> mSurroundLevel{0.5f};
+    std::atomic<int> mSurroundMode{0};    // 0=Off, 1=Music, 2=Movie, 3=Game, 4=Podcast
     std::atomic<bool> mHeadphoneSurround{false};
     std::atomic<int> mHeadphoneType{0};  // 0=Generic, 1=InEar, 2=OverEar, 3=OpenBack, 4=Studio
     

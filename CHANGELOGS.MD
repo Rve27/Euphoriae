@@ -102,3 +102,6 @@
         * Over-Ear - Natural crossfeed, high freq boost
         * Open-Back - Minimal processing, longer delay
         * Studio - Flat accurate response
+- feat: Implement Surround Mode presets (Off, Music, Movie, Game, Podcast)
+    - Each mode auto-applies optimized 3D effect, room size, and surround level
+    - Game mode auto-enables headphone surround for precise positioning

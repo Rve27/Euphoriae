@@ -109,6 +109,11 @@ Java_com_oss_euphoriae_engine_AudioEngine_nativeSetSurroundLevel(JNIEnv *env, jo
 }
 
 JNIEXPORT void JNICALL
+Java_com_oss_euphoriae_engine_AudioEngine_nativeSetSurroundMode(JNIEnv *env, jobject thiz, jint mode) {
+    if (sEngine) sEngine->setSurroundMode(mode);
+}
+
+JNIEXPORT void JNICALL
 Java_com_oss_euphoriae_engine_AudioEngine_nativeSetHeadphoneSurround(JNIEnv *env, jobject thiz, jboolean enabled) {
     if (sEngine) sEngine->setHeadphoneSurround(enabled);
 }
