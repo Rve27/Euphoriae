@@ -28,8 +28,28 @@
 - **Search**: Quickly find your songs
 - **Modern UI**: Clean, intuitive interface with smooth animations
 - **Typography**: Plus Jakarta Sans
+- **Lyrics**: Timed lyrics display (needed file *.lrc)
 
 ## Screenshots
+
+### v1.3
+
+<p align="center">
+  <img src="screenshoots/1.3/Screenshot_20260105-062425_Euphoriae.png" width="200" alt="Now Playing"/>
+  <img src="screenshoots/1.3/Screenshot_20260105-062431_Euphoriae.png" width="200" alt="Lyrics View"/>
+  <img src="screenshoots/1.3/Screenshot_20260105-062443_Euphoriae.png" width="200" alt="Equalizer"/>
+  <img src="screenshoots/1.3/Screenshot_20260105-062447_Euphoriae.png" width="200" alt="Surround Sound"/>
+</p>
+
+<p align="center">
+  <img src="screenshoots/1.3/Screenshot_20260105-062451_Euphoriae.png" width="200" alt="Dynamic Processing"/>
+  <img src="screenshoots/1.3/Screenshot_20260105-062453_Euphoriae.png" width="200" alt="Audio Enhancement"/>
+  <img src="screenshoots/1.3/Screenshot_20260105-062455_Euphoriae.png" width="200" alt="Playback Control"/>
+</p>
+
+---
+
+### v1.0 - Initial Release
 
 <p align="center">
   <img src="screenshoots/Screenshot_20251224-173516_Euphoriae.png" width="200" alt="Home Screen"/>
