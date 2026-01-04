@@ -221,11 +221,11 @@ fun EqualizerScreen(
         stereoBalance = 0f; audioPreferences?.setStereoBalance(0f); audioEngine?.setStereoBalance(0f)
         channelSeparation = 0.5f; audioPreferences?.setChannelSeparation(0.5f); audioEngine?.setChannelSeparation(0.5f)
         surroundMode = SurroundMode.OFF; audioPreferences?.setSurroundMode(SurroundMode.OFF)
-        surroundLevel = 0.5f; audioPreferences?.setSurroundLevel(0.5f)
+        surroundLevel = 0.5f; audioPreferences?.setSurroundLevel(0.5f); audioEngine?.setSurroundLevel(0.5f)
         roomSize = 0.5f; audioPreferences?.setRoomSize(0.5f); audioEngine?.setRoomSize(0.5f)
         effect3d = 0f; audioPreferences?.set3DEffect(0f); audioEngine?.setSurround3D(0f)
-        headphoneType = HeadphoneType.GENERIC; audioPreferences?.setHeadphoneType(HeadphoneType.GENERIC)
-        headphoneSurround = false; audioPreferences?.setHeadphoneSurround(false)
+        headphoneType = HeadphoneType.GENERIC; audioPreferences?.setHeadphoneType(HeadphoneType.GENERIC); audioEngine?.setHeadphoneType(HeadphoneType.GENERIC.ordinal)
+        headphoneSurround = false; audioPreferences?.setHeadphoneSurround(false); audioEngine?.setHeadphoneSurround(false)
         compressor = 0f; audioPreferences?.setCompressor(0f); audioEngine?.setCompressor(0f)
         volumeLeveler = 0f; audioPreferences?.setVolumeLeveler(0f); audioEngine?.setVolumeLeveler(0f)
         limiter = 0f; audioPreferences?.setLimiter(0f); audioEngine?.setLimiter(0.99f)
@@ -639,8 +639,15 @@ fun EqualizerScreen(
                             enabled = isEnabled
                         )
                     }
-                    Spacer(modifier = Modifier.weight(1f))
                 }
+                
+                // Show description for selected headphone type
+                Text(
+                    text = headphoneType.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 

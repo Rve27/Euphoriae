@@ -26,12 +26,12 @@ enum class SurroundMode(val displayName: String) {
     PODCAST("Podcast")
 }
 
-enum class HeadphoneType(val displayName: String) {
-    GENERIC("Generic"),
-    IN_EAR("In-ear"),
-    ON_EAR("On-ear"),
-    OVER_EAR("Over-ear"),
-    EARBUDS("Earbuds")
+enum class HeadphoneType(val displayName: String, val description: String) {
+    GENERIC("Generic", "Standard headphones"),
+    IN_EAR("In-Ear", "IEMs with bass boost"),
+    OVER_EAR("Over-Ear", "Full-size headphones"),
+    OPEN_BACK("Open-Back", "Natural soundstage"),
+    STUDIO("Studio", "Flat monitoring")
 }
 
 enum class EffectProfile(val displayName: String, val description: String) {

@@ -93,3 +93,12 @@
 - feat: enhance playlist ui and dynamic covers
 - feat: enhance album grouping and card ui
 - feat: add playlist creation from albums
+- fix: Fully integrate Surround Sound parameters in native audio engine
+    - SurroundLevel now affects 3D effect strength
+    - Headphone Surround toggle enables ITD (Interaural Time Difference) simulation
+    - Headphone Type selection adapts crossfeed, delay, and EQ characteristics:
+        * Generic - Standard processing
+        * In-Ear - Enhanced bass, shorter delay
+        * Over-Ear - Natural crossfeed, high freq boost
+        * Open-Back - Minimal processing, longer delay
+        * Studio - Flat accurate response

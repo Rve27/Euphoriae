@@ -395,20 +395,70 @@ void AudioEngine::applyLimiter(float* buffer, int32_t numSamples) {
 void AudioEngine::applySurround3D(float* buffer, int32_t numFrames) {
     float depth = mSurround3D.load();
     float roomSize = mRoomSize.load();
+    float surroundLevel = mSurroundLevel.load();
+    bool headphoneSurround = mHeadphoneSurround.load();
+    int headphoneType = mHeadphoneType.load();
     
-    // Delay time based on room size (0.5ms to 30ms)
-    int delayFrames = static_cast<int>((0.5f + roomSize * 29.5f) * 48.0f);  // at 48kHz
+    // Combined effect strength from depth and surround level
+    float effectStrength = depth * (0.5f + surroundLevel * 0.5f);
+    
+    // Headphone-specific adjustments
+    float crossfeedAmount = 0.3f;  // Base crossfeed
+    float delayMultiplier = 1.0f;
+    float bassEnhance = 0.0f;
+    float highFreqBoost = 0.0f;
+    
+    if (headphoneSurround) {
+        // Adjust based on headphone type
+        switch (headphoneType) {
+            case 0:  // Generic
+                crossfeedAmount = 0.25f;
+                delayMultiplier = 1.0f;
+                break;
+            case 1:  // In-Ear - more intimate, less delay needed
+                crossfeedAmount = 0.20f;
+                delayMultiplier = 0.7f;
+                bassEnhance = 0.15f;  // In-ears often lack bass
+                break;
+            case 2:  // Over-Ear - fuller sound, more natural crossfeed
+                crossfeedAmount = 0.35f;
+                delayMultiplier = 1.2f;
+                highFreqBoost = 0.1f;
+                break;
+            case 3:  // Open-Back - natural soundstage, minimal processing
+                crossfeedAmount = 0.15f;
+                delayMultiplier = 1.5f;
+                break;
+            case 4:  // Studio - accurate, moderate crossfeed
+                crossfeedAmount = 0.28f;
+                delayMultiplier = 1.0f;
+                highFreqBoost = 0.05f;
+                break;
+        }
+    }
+    
+    // Delay time based on room size (0.5ms to 30ms), adjusted by headphone type
+    int delayFrames = static_cast<int>((0.5f + roomSize * 29.5f) * 48.0f * delayMultiplier);
     delayFrames = std::min(delayFrames, kMaxDelayFrames - 1);
+    
+    // Secondary delay for HRTF-like effect (interaural time difference)
+    int itdDelay = static_cast<int>(15.0f * delayMultiplier);  // ~0.3ms ITD simulation
+    itdDelay = std::min(itdDelay, kMaxDelayFrames - 1);
     
     for (int32_t i = 0; i < numFrames; i++) {
         int idx = i * 2;
         float left = buffer[idx];
         float right = buffer[idx + 1];
         
-        // Get delayed samples
+        // Get delayed samples for room simulation
         int readPos = (mDelayWritePos - delayFrames + kMaxDelayFrames) % kMaxDelayFrames;
         float delayedL = mDelayBufferL[readPos];
         float delayedR = mDelayBufferR[readPos];
+        
+        // Get ITD delayed samples for spatial cue
+        int itdReadPos = (mDelayWritePos - itdDelay + kMaxDelayFrames) % kMaxDelayFrames;
+        float itdDelayedL = mDelayBufferL[itdReadPos];
+        float itdDelayedR = mDelayBufferR[itdReadPos];
         
         // Write to delay buffer
         mDelayBufferL[mDelayWritePos] = left;
@@ -416,9 +466,37 @@ void AudioEngine::applySurround3D(float* buffer, int32_t numFrames) {
         mDelayWritePos = (mDelayWritePos + 1) % kMaxDelayFrames;
         
         // Cross-mix with delayed signal for 3D effect
-        float crossGain = depth * 0.3f;
-        buffer[idx] = left + delayedR * crossGain;
-        buffer[idx + 1] = right + delayedL * crossGain;
+        float crossGain = effectStrength * crossfeedAmount;
+        
+        // Apply surround processing
+        float newLeft = left + delayedR * crossGain;
+        float newRight = right + delayedL * crossGain;
+        
+        // Add ITD crossfeed for more natural spatialization (if headphone surround enabled)
+        if (headphoneSurround) {
+            float itdGain = effectStrength * 0.15f;
+            newLeft += itdDelayedR * itdGain;
+            newRight += itdDelayedL * itdGain;
+            
+            // Apply headphone-specific enhancements
+            if (bassEnhance > 0.0f) {
+                // Simple bass emphasis for in-ear headphones
+                float mid = (left + right) * 0.5f;
+                float bass = mid * bassEnhance * effectStrength;
+                newLeft += bass;
+                newRight += bass;
+            }
+            
+            if (highFreqBoost > 0.0f) {
+                // Simple high frequency emphasis
+                float diff = (left - right) * highFreqBoost * effectStrength;
+                newLeft += diff;
+                newRight -= diff;
+            }
+        }
+        
+        buffer[idx] = newLeft;
+        buffer[idx + 1] = newRight;
     }
 }
 
