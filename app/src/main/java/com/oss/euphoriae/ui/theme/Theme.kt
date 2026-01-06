@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@file:Suppress("RestrictedApi")
 
 package com.oss.euphoriae.ui.theme
 
