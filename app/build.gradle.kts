@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.material3)
@@ -106,9 +107,6 @@ dependencies {
 
     // Compose BOM
     implementation(platform(libs.androidx.compose.bom))
-
-    // Navigation Compose
-    implementation(libs.androidx.navigation.compose.v284)
 
     // Room Database
     implementation(libs.room.runtime)
@@ -133,13 +131,13 @@ dependencies {
     implementation(libs.androidx.palette.ktx)
 
     // DataStore Preferences
-    implementation("androidx.datastore:datastore-preferences:1.2.0")
+    implementation(libs.androidx.datastore.preferences)
 
     // Material Color Utilities
-    implementation("com.google.android.material:material:1.13.0")
+    implementation(libs.material)
 
     // Glance for App Widgets
-    implementation("androidx.glance:glance-appwidget:1.1.1")
-    implementation("androidx.glance:glance-material3:1.1.1")
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
 
 }
