@@ -7,11 +7,13 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import androidx.annotation.OptIn
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
@@ -55,6 +57,7 @@ data class MusicUiState(
     val currentLyricIndex: Int = -1
 )
 
+@OptIn(UnstableApi::class)
 class MusicViewModel(application: Application) : AndroidViewModel(application) {
     
     private val repository = (application as EuphoriaeApp).musicRepository

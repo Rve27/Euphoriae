@@ -2,11 +2,14 @@ package com.oss.euphoriae.data.`class`
 
 import android.content.Context
 import android.net.Uri
+import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 
+@OptIn(UnstableApi::class)
 class EuphoriaePlayer(private val context: Context) {
     
     private var exoPlayer: ExoPlayer? = null
