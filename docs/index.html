@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Euphoriae - Modern Music Player for Android</title>
+    <meta name="description"
+        content="Euphoriae is a free & open source music player for Android inspired by the Greek word Euphoria. Features Material You theming, advanced equalizer, and native DSP audio processing.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="../logo/logo.png" type="image/png">
+</head>
+
+<body>
+    <!-- Floating particles background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Navigation -->
+    <nav class="nav" id="nav">
+        <div class="nav-container">
+            <a href="#hero" class="nav-logo">
+                <img src="../logo/logo.png" alt="Euphoriae Logo">
+                <span>Euphoriae</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#screenshots">Screenshots</a>
+                <a href="#tech">Tech Stack</a>
+                <a href="#changelog">Changelog</a>
+                <a href="#getting-started">Get Started</a>
+            </div>
+            <a href="https://github.com/ellenoireQ/euphoriae/releases" class="nav-cta" target="_blank">
+                <span class="material-icons-round">download</span>
+                Download
+            </a>
+            <button class="nav-toggle" id="navToggle">
+                <span class="material-icons-round">menu</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Nav -->
+    <div class="mobile-nav" id="mobileNav">
+        <a href="#features">Features</a>
+        <a href="#screenshots">Screenshots</a>
+        <a href="#tech">Tech Stack</a>
+        <a href="#changelog">Changelog</a>
+        <a href="#getting-started">Get Started</a>
+        <a href="https://github.com/ellenoireQ/euphoriae/releases" target="_blank">Download</a>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-bg">
+            <div class="hero-gradient"></div>
+            <div class="hero-orb hero-orb-1"></div>
+            <div class="hero-orb hero-orb-2"></div>
+            <div class="hero-orb hero-orb-3"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-text">
+                <div class="hero-badge">
+                    <span class="material-icons-round">auto_awesome</span>
+                    Free & Open Source
+                </div>
+                <h1 class="hero-title">
+                    Experience <span class="gradient-text">Euphoria</span> in Every Beat
+                </h1>
+                <p class="hero-subtitle">
+                    A modern local music player for Android with Material You theming,
+                    advanced 10-band equalizer, and native DSP audio processing.
+                </p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-value">10</span>
+                        <span class="stat-label">Band EQ</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat">
+                        <span class="stat-value">12</span>
+                        <span class="stat-label">Presets</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat">
+                        <span class="stat-value">API 25+</span>
+                        <span class="stat-label">Android</span>
+                    </div>
+                </div>
+                <div class="hero-buttons">
+                    <a href="https://github.com/ellenoireQ/euphoriae/releases" class="btn btn-primary" target="_blank">
+                        <span class="material-icons-round">download</span>
+                        Download APK
+                    </a>
+                    <a href="https://github.com/ellenoireQ/euphoriae" class="btn btn-secondary" target="_blank">
+                        <span class="material-icons-round">code</span>
+                        View Source
+                    </a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="phone-mockup">
+                    <div class="phone-frame">
+                        <div class="phone-notch"></div>
+                        <img src="../screenshoots/1.3/Screenshot_20260105-062425_Euphoriae.png"
+                            alt="Euphoriae Now Playing" class="phone-screen">
+                    </div>
+                </div>
+                <div class="floating-cards">
+                    <div class="floating-card card-1">
+                        <span class="material-icons-round">graphic_eq</span>
+                        <span>10-Band EQ</span>
+                    </div>
+                    <div class="floating-card card-2">
+                        <span class="material-icons-round">palette</span>
+                        <span>Material You</span>
+                    </div>
+                    <div class="floating-card card-3">
+                        <span class="material-icons-round">lyrics</span>
+                        <span>Lyrics Sync</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span class="material-icons-round">keyboard_arrow_down</span>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Features</span>
+                <h2 class="section-title">Everything You Need for <span class="gradient-text">Perfect Audio</span></h2>
+                <p class="section-subtitle">Packed with professional-grade audio features in a beautiful Material Design
+                    3 interface</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card feature-large" data-aos="fade-up">
+                    <div class="feature-icon-wrapper gradient-purple">
+                        <span class="material-icons-round">graphic_eq</span>
+                    </div>
+                    <h3>10-Band Equalizer</h3>
+                    <p>Full professional equalizer from 31Hz to 16kHz with 12 built-in presets including Bass Boost,
+                        Rock, Pop, Jazz, Classical, and more.</p>
+                    <div class="feature-tags">
+                        <span class="tag">31Hz - 16kHz</span>
+                        <span class="tag">12 Presets</span>
+                        <span class="tag">Custom EQ</span>
+                    </div>
+                </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-icon-wrapper gradient-blue">
+                        <span class="material-icons-round">surround_sound</span>
+                    </div>
+                    <h3>3D Surround Sound</h3>
+                    <p>Immersive spatial audio with Music, Movie, Game, and Podcast modes. Adjustable room size and
+                        surround level.</p>
+                </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-icon-wrapper gradient-teal">
+                        <span class="material-icons-round">headphones</span>
+                    </div>
+                    <h3>Headphone Optimization</h3>
+                    <p>Adaptive processing for In-ear, On-ear, Over-ear headphones with ITD simulation for natural
+                        soundstage.</p>
+                </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-icon-wrapper gradient-orange">
+                        <span class="material-icons-round">speed</span>
+                    </div>
+                    <h3>Tempo & Pitch Control</h3>
+                    <p>Adjust playback speed and pitch independently. Perfect for music practice or podcasts at your
+                        pace.</p>
+                </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="feature-icon-wrapper gradient-pink">
+                        <span class="material-icons-round">palette</span>
+                    </div>
+                    <h3>Material You Theming</h3>
+                    <p>Dynamic colors that adapt to your wallpaper. Light, dark, and system theme options available.</p>
+                </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
+                    <div class="feature-icon-wrapper gradient-green">
+                        <span class="material-icons-round">lyrics</span>
+                    </div>
+                    <h3>Timed Lyrics</h3>
+                    <p>Beautiful synchronized lyrics display with LRC file support. Smooth scrolling and bold
+                        typography.</p>
+                </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="600">
+                    <div class="feature-icon-wrapper gradient-cyan">
+                        <span class="material-icons-round">tune</span>
+                    </div>
+                    <h3>Dynamic Processing</h3>
+                    <p>Compressor, Volume Leveler, and Limiter for consistent loudness. Protect your ears from clipping.
+                    </p>
+                </div>
+
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="700">
+                    <div class="feature-icon-wrapper gradient-red">
+                        <span class="material-icons-round">bolt</span>
+                    </div>
+                    <h3>Native DSP Engine</h3>
+                    <p>All effects processed in real-time C++ for ultra-low latency. Professional-grade audio
+                        processing.</p>
+                </div>
+            </div>
+
+            <!-- More Features Grid -->
+            <div class="features-extra">
+                <div class="extra-feature" data-aos="fade-up">
+                    <span class="material-icons-round">queue_music</span>
+                    <span>Playlist Management</span>
+                </div>
+                <div class="extra-feature" data-aos="fade-up" data-aos-delay="50">
+                    <span class="material-icons-round">shuffle</span>
+                    <span>Shuffle & Repeat</span>
+                </div>
+                <div class="extra-feature" data-aos="fade-up" data-aos-delay="100">
+                    <span class="material-icons-round">search</span>
+                    <span>Quick Search</span>
+                </div>
+                <div class="extra-feature" data-aos="fade-up" data-aos-delay="150">
+                    <span class="material-icons-round">widgets</span>
+                    <span>Home Widget</span>
+                </div>
+                <div class="extra-feature" data-aos="fade-up" data-aos-delay="200">
+                    <span class="material-icons-round">album</span>
+                    <span>Album Grouping</span>
+                </div>
+                <div class="extra-feature" data-aos="fade-up" data-aos-delay="250">
+                    <span class="material-icons-round">swap_horizontal_circle</span>
+                    <span>Crossfade</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Screenshots Section -->
+    <section class="screenshots" id="screenshots">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Gallery</span>
+                <h2 class="section-title">Beautiful <span class="gradient-text">Interface</span></h2>
+                <p class="section-subtitle">Clean, intuitive design with smooth animations and stunning visuals</p>
+            </div>
+
+            <div class="screenshot-tabs">
+                <button class="screenshot-tab active" data-tab="v13">Version 1.3</button>
+                <button class="screenshot-tab" data-tab="v10">Version 1.0</button>
+            </div>
+
+            <div class="screenshot-gallery" id="gallery-v13">
+                <div class="screenshot-item" data-aos="zoom-in">
+                    <img src="../screenshoots/1.3/Screenshot_20260105-062425_Euphoriae.png" alt="Now Playing"
+                        loading="lazy">
+                    <span class="screenshot-label">Lyrics View</span>
+                </div>
+                <div class="screenshot-item" data-aos="zoom-in" data-aos-delay="100">
+                    <img src="../screenshoots/1.3/Screenshot_20260105-062431_Euphoriae.png" alt="Lyrics View"
+                        loading="lazy">
+                    <span class="screenshot-label">Album</span>
+                </div>
+                <div class="screenshot-item" data-aos="zoom-in" data-aos-delay="200">
+                    <img src="../screenshoots/1.3/Screenshot_20260105-062443_Euphoriae.png" alt="Equalizer"
+                        loading="lazy">
+                    <span class="screenshot-label">Playlists</span>
+                </div>
+                <div class="screenshot-item" data-aos="zoom-in" data-aos-delay="300">
+                    <img src="../screenshoots/1.3/Screenshot_20260105-062447_Euphoriae.png" alt="Surround Sound"
+                        loading="lazy">
+                    <span class="screenshot-label">Equalizer</span>
+                </div>
+                <div class="screenshot-item" data-aos="zoom-in" data-aos-delay="400">
+                    <img src="../screenshoots/1.3/Screenshot_20260105-062451_Euphoriae.png" alt="Dynamic Processing"
+                        loading="lazy">
+                    <span class="screenshot-label">Equalizer</span>
+                </div>
+                <div class="screenshot-item" data-aos="zoom-in" data-aos-delay="500">
+                    <img src="../screenshoots/1.3/Screenshot_20260105-062453_Euphoriae.png" alt="Audio Enhancement"
+                        loading="lazy">
+                    <span class="screenshot-label">Equalizer</span>
+                </div>
+                <div class="screenshot-item" data-aos="zoom-in" data-aos-delay="600">
+                    <img src="../screenshoots/1.3/Screenshot_20260105-062455_Euphoriae.png" alt="Playback Control"
+                        loading="lazy">
+                    <span class="screenshot-label">Equalizer</span>
+                </div>
+            </div>
+
+            <div class="screenshot-gallery hidden" id="gallery-v10">
+                <div class="screenshot-item">
+                    <img src="../screenshoots/Screenshot_20251224-173516_Euphoriae.png" alt="Home Screen"
+                        loading="lazy">
+                    <span class="screenshot-label">Home Screen</span>
+                </div>
+                <div class="screenshot-item">
+                    <img src="../screenshoots/Screenshot_20251224-173521_Euphoriae.png" alt="Songs List" loading="lazy">
+                    <span class="screenshot-label">Songs List</span>
+                </div>
+                <div class="screenshot-item">
+                    <img src="../screenshoots/Screenshot_20251224-173528_Euphoriae.png" alt="Playlist" loading="lazy">
+                    <span class="screenshot-label">Playlist</span>
+                </div>
+                <div class="screenshot-item">
+                    <img src="../screenshoots/Screenshot_20251224-173555_Euphoriae.png" alt="Now Playing"
+                        loading="lazy">
+                    <span class="screenshot-label">Now Playing</span>
+                </div>
+                <div class="screenshot-item">
+                    <img src="../screenshoots/Screenshot_20251224-173621_Euphoriae.png" alt="Equalizer" loading="lazy">
+                    <span class="screenshot-label">Equalizer</span>
+                </div>
+                <div class="screenshot-item">
+                    <img src="../screenshoots/Screenshot_20251224-173628_Euphoriae.png" alt="Settings" loading="lazy">
+                    <span class="screenshot-label">Settings</span>
+                </div>
+                <div class="screenshot-item">
+                    <img src="../screenshoots/Screenshot_20251224-173645_Euphoriae.png" alt="Light Mode" loading="lazy">
+                    <span class="screenshot-label">Light Mode</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack Section -->
+    <section class="tech" id="tech">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Technology</span>
+                <h2 class="section-title">Built with <span class="gradient-text">Modern Stack</span></h2>
+                <p class="section-subtitle">Leveraging the best Android development technologies</p>
+            </div>
+
+            <div class="tech-grid">
+                <div class="tech-card" data-aos="fade-up">
+                    <div class="tech-icon">
+                        <img src="https://raw.githubusercontent.com/JetBrains/kotlin-web-site/master/assets/images/favicon.svg"
+                            alt="Kotlin">
+                    </div>
+                    <h3>Kotlin 2.0</h3>
+                    <p>Modern, concise, and safe programming language</p>
+                </div>
+                <div class="tech-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="tech-icon compose">
+                        <span class="material-icons-round">layers</span>
+                    </div>
+                    <h3>Jetpack Compose</h3>
+                    <p>Declarative UI toolkit with Material Design 3</p>
+                </div>
+                <div class="tech-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="tech-icon exo">
+                        <span class="material-icons-round">play_circle</span>
+                    </div>
+                    <h3>Media3 ExoPlayer</h3>
+                    <p>High-quality audio playback with MediaSession</p>
+                </div>
+                <div class="tech-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="tech-icon room">
+                        <span class="material-icons-round">storage</span>
+                    </div>
+                    <h3>Room Database</h3>
+                    <p>Robust local data persistence library</p>
+                </div>
+                <div class="tech-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="tech-icon coil">
+                        <span class="material-icons-round">image</span>
+                    </div>
+                    <h3>Coil</h3>
+                    <p>Fast, lightweight image loading for Compose</p>
+                </div>
+                <div class="tech-card" data-aos="fade-up" data-aos-delay="500">
+                    <div class="tech-icon native">
+                        <span class="material-icons-round">memory</span>
+                    </div>
+                    <h3>Native C++ DSP</h3>
+                    <p>Low-latency audio processing engine</p>
+                </div>
+            </div>
+
+            <!-- Architecture Diagram -->
+            <div class="architecture" data-aos="fade-up">
+                <h3>📁 Project Structure</h3>
+                <div class="structure-tree">
+                    <pre><code>app/src/main/java/com/oss/euphoriae/
+├── <span class="folder">data/</span>
+│   ├── <span class="folder">class/</span>          <span class="comment"># Player & Audio Effects</span>
+│   ├── <span class="folder">local/</span>          <span class="comment"># Room Database & DAO</span>
+│   ├── <span class="folder">model/</span>          <span class="comment"># Data classes (Song, Playlist)</span>
+│   └── <span class="folder">repository/</span>     <span class="comment"># Music Repository</span>
+├── <span class="folder">service/</span>            <span class="comment"># Media Playback Service</span>
+├── <span class="folder">ui/</span>
+│   ├── <span class="folder">components/</span>     <span class="comment"># Reusable UI components</span>
+│   ├── <span class="folder">screens/</span>        <span class="comment"># App screens</span>
+│   ├── <span class="folder">theme/</span>          <span class="comment"># Material You theming</span>
+│   └── <span class="folder">viewmodel/</span>      <span class="comment"># ViewModels</span>
+├── <span class="file">EuphoriaeApp.kt</span>     <span class="comment"># Application class</span>
+└── <span class="file">MainActivity.kt</span>     <span class="comment"># Main entry point</span></code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Changelog Section -->
+    <section class="changelog" id="changelog">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Updates</span>
+                <h2 class="section-title">Version <span class="gradient-text">History</span></h2>
+                <p class="section-subtitle">Track the evolution of Euphoriae</p>
+            </div>
+
+            <div class="changelog-timeline">
+                <div class="changelog-item" data-aos="fade-right">
+                    <div class="changelog-marker">
+                        <span class="version-badge latest">1.3</span>
+                    </div>
+                    <div class="changelog-content">
+                        <h3>Audio Engine Overhaul</h3>
+                        <ul>
+                            <li><strong>10-Band Graphic Equalizer</strong> - 31Hz to 16kHz with 12 presets</li>
+                            <li><strong>Surround Sound / 3D Audio</strong> - Music, Movie, Game, Podcast modes</li>
+                            <li><strong>Headphone Optimization</strong> - Type-specific processing</li>
+                            <li><strong>Dynamic Processing</strong> - Compressor, Limiter, Volume Leveler</li>
+                            <li><strong>Audio Enhancement</strong> - Clarity, Tube Amp Warmth, Spectrum Extension</li>
+                            <li><strong>Reverb Engine</strong> - 7 presets from Small Room to Large Hall</li>
+                            <li><strong>Tempo & Pitch Control</strong> - Independent adjustment</li>
+                            <li><strong>Crossfade</strong> - Smooth transitions between tracks</li>
+                            <li><strong>Home Screen Widget</strong> - Glance API widget</li>
+                            <li><strong>Timed Lyrics</strong> - LRC file support with sync</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="changelog-item" data-aos="fade-right" data-aos-delay="100">
+                    <div class="changelog-marker">
+                        <span class="version-badge">1.2</span>
+                    </div>
+                    <div class="changelog-content">
+                        <h3>Native DSP Engine</h3>
+                        <ul>
+                            <li>Native C++ audio engine for DSP processing</li>
+                            <li>Custom AudioProcessor for ExoPlayer integration</li>
+                            <li>Native bass boost with low-pass filter</li>
+                            <li>Native stereo virtualizer</li>
+                            <li>Native 10-band equalizer support</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="changelog-item" data-aos="fade-right" data-aos-delay="200">
+                    <div class="changelog-marker">
+                        <span class="version-badge">1.1</span>
+                    </div>
+                    <div class="changelog-content">
+                        <h3>Theme & Performance</h3>
+                        <ul>
+                            <li>System/Dark/Light mode toggle</li>
+                            <li>Color palette to seed Material 3 colors</li>
+                            <li>Fixed force close ANR issues</li>
+                            <li>Enable minify & shrink resources</li>
+                            <li>ProGuard rules optimization</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="changelog-item" data-aos="fade-right" data-aos-delay="300">
+                    <div class="changelog-marker">
+                        <span class="version-badge">1.0</span>
+                    </div>
+                    <div class="changelog-content">
+                        <h3>Initial Release</h3>
+                        <ul>
+                            <li>Local music playback with ExoPlayer</li>
+                            <li>Playlist management</li>
+                            <li>Basic equalizer</li>
+                            <li>Material Design 3 UI</li>
+                            <li>Search functionality</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Getting Started Section -->
+    <section class="getting-started" id="getting-started">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Quick Start</span>
+                <h2 class="section-title">Get <span class="gradient-text">Started</span></h2>
+                <p class="section-subtitle">Download or build from source</p>
+            </div>
+
+            <div class="start-grid">
+                <div class="start-card download" data-aos="fade-up">
+                    <div class="start-icon">
+                        <span class="material-icons-round">download</span>
+                    </div>
+                    <h3>Download APK</h3>
+                    <p>Get the latest release directly from GitHub</p>
+                    <a href="https://github.com/ellenoireQ/euphoriae/releases" class="btn btn-primary" target="_blank">
+                        <span class="material-icons-round">file_download</span>
+                        Latest Release
+                    </a>
+                    <div class="download-info">
+                        <div class="info-item">
+                            <span class="material-icons-round">android</span>
+                            <span>Android 7.1+ (API 25)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="start-card build" data-aos="fade-up" data-aos-delay="100">
+                    <div class="start-icon">
+                        <span class="material-icons-round">build</span>
+                    </div>
+                    <h3>Build from Source</h3>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span>Terminal</span>
+                            <button class="copy-btn" onclick="copyCode(this)">
+                                <span class="material-icons-round">content_copy</span>
+                            </button>
+                        </div>
+                        <pre><code><span class="comment"># Clone repository</span>
+git clone https://github.com/ellenoireQ/euphoriae.git
+cd euphoriae
+
+<span class="comment"># Open in Android Studio then sync Gradle</span>
+
+<span class="comment"># Build debug APK</span>
+./gradlew assembleDebug
+
+<span class="comment"># Or run directly on device</span>
+./gradlew installDebug</code></pre>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="cta-bg">
+            <div class="cta-orb cta-orb-1"></div>
+            <div class="cta-orb cta-orb-2"></div>
+        </div>
+        <div class="container">
+            <div class="cta-content" data-aos="zoom-in">
+                <h2>Ready to Experience <span class="gradient-text">Euphoria</span>?</h2>
+                <p>Download Euphoriae now and transform your music listening experience</p>
+                <div class="cta-buttons">
+                    <a href="https://github.com/ellenoireQ/euphoriae/releases" class="btn btn-primary btn-large"
+                        target="_blank">
+                        <span class="material-icons-round">download</span>
+                        Download Now
+                    </a>
+                    <a href="https://github.com/ellenoireQ/euphoriae" class="btn btn-outline btn-large" target="_blank">
+                        <span class="material-icons-round">star</span>
+                        Star on GitHub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="../logo/logo.png" alt="Euphoriae Logo">
+                    <span>Euphoriae</span>
+                </div>
+                <div class="footer-links">
+                    <a href="https://github.com/ellenoireQ/euphoriae" target="_blank">GitHub</a>
+                    <a href="https://github.com/ellenoireQ/euphoriae/releases" target="_blank">Releases</a>
+                    <a href="https://github.com/ellenoireQ/euphoriae/issues" target="_blank">Issues</a>
+                    <a href="https://github.com/ellenoireQ/euphoriae/blob/main/LICENSE" target="_blank">License</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 Euphoriae. Licensed under Apache License 2.0</p>
+                <p>Made with <span class="heart">❤️</span> using Kotlin & Jetpack Compose</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Image Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close">
+            <span class="material-icons-round">close</span>
+        </button>
+        <img src="" alt="Screenshot Preview" id="lightbox-img">
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
