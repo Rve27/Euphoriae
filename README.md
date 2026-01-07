@@ -1,4 +1,6 @@
 # Euphoriae
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FellenoireQ%2FEuphoriae.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FellenoireQ%2FEuphoriae?ref=badge_shield)
+
 
 <p align="center">
   <img src="logo/logo.png" width="120" alt="Euphoriae Logo"/>
@@ -139,6 +141,9 @@ app/src/main/java/com/oss/euphoriae/
   limitations under the License.
 ```
 
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FellenoireQ%2FEuphoriae.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FellenoireQ%2FEuphoriae?ref=badge_large)
+
 ## 🤝 Contributing
 
 Contributions are welcome! Feel free to:
@@ -151,5 +156,3 @@ Contributions are welcome! Feel free to:
 
 
 ---
-
-
