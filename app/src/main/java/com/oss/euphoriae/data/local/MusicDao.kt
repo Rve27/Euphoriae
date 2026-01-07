@@ -2,6 +2,7 @@ package com.oss.euphoriae.data.local
 
 import androidx.room.*
 import com.oss.euphoriae.data.model.Album
+import com.oss.euphoriae.data.model.CachedLyrics
 import com.oss.euphoriae.data.model.Playlist
 import com.oss.euphoriae.data.model.PlaylistSong
 import com.oss.euphoriae.data.model.Song
@@ -60,9 +61,20 @@ interface MusicDao {
 
     @Query("SELECT ps.playlistId, s.albumArtUri FROM playlist_songs ps JOIN songs s ON ps.songId = s.id")
     fun getAllPlaylistItems(): Flow<List<PlaylistItem>>
+    
+    // Cached Lyrics
+    @Query("SELECT * FROM cached_lyrics WHERE songId = :songId")
+    suspend fun getCachedLyrics(songId: Long): CachedLyrics?
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCachedLyrics(lyrics: CachedLyrics)
+    
+    @Query("DELETE FROM cached_lyrics WHERE songId = :songId")
+    suspend fun deleteCachedLyrics(songId: Long)
 }
 
 data class PlaylistItem(
     val playlistId: Long,
     val albumArtUri: String?
 )
+

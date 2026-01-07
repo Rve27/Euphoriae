@@ -51,6 +51,51 @@ object LrcParser {
         return Lyrics(lyricLines.sortedBy { it.timestamp })
     }
     
+    /**
+     * Parse LRC format string (from LRCLIB API syncedLyrics)
+     */
+    fun parseString(lrcContent: String): Lyrics? {
+        val lyricLines = mutableListOf<LyricLine>()
+        
+        try {
+            lrcContent.lines().forEach { line ->
+                val matches = TIME_REGEX.findAll(line).toList()
+                if (matches.isNotEmpty()) {
+                    val text = line.replace(TIME_REGEX, "").trim()
+                    matches.forEach { matchResult ->
+                        val (min, sec, msStr) = matchResult.destructured
+                        val ms = if (msStr.length == 2) msStr.toLong() * 10 else msStr.toLong()
+                        val timestamp = (min.toLong() * 60 * 1000) + (sec.toLong() * 1000) + ms
+                        lyricLines.add(LyricLine(text, timestamp))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
+        }
+        
+        if (lyricLines.isEmpty()) return null
+        
+        return Lyrics(lyricLines.sortedBy { it.timestamp })
+    }
+    
+    /**
+     * Parse plain lyrics (non-synced) - creates lyrics with isSynced = false
+     */
+    fun parsePlainLyrics(plainLyrics: String): Lyrics? {
+        val lines = plainLyrics.lines()
+            .filter { it.isNotBlank() }
+            .mapIndexed { index, text ->
+                // Assign fake timestamps (just for ordering)
+                LyricLine(text.trim(), index * 5000L)
+            }
+        
+        if (lines.isEmpty()) return null
+        
+        return Lyrics(lines, isSynced = false)
+    }
+    
     fun findLrcFile(songPath: String): File? {
         // Assume songPath is like /storage/emulated/0/Music/Song.mp3
         // We look for /storage/emulated/0/Music/Song.lrc
@@ -67,3 +112,4 @@ object LrcParser {
         return if (lrcFile.exists()) lrcFile else null
     }
 }
+

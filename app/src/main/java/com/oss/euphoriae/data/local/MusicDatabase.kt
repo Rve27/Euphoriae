@@ -6,13 +6,14 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.oss.euphoriae.data.model.CachedLyrics
 import com.oss.euphoriae.data.model.Playlist
 import com.oss.euphoriae.data.model.PlaylistSong
 import com.oss.euphoriae.data.model.Song
 
 @Database(
-    entities = [Song::class, Playlist::class, PlaylistSong::class],
-    version = 2,
+    entities = [Song::class, Playlist::class, PlaylistSong::class, CachedLyrics::class],
+    version = 3,
     exportSchema = false
 )
 abstract class MusicDatabase : RoomDatabase() {
@@ -29,6 +30,21 @@ abstract class MusicDatabase : RoomDatabase() {
             }
         }
         
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS cached_lyrics (
+                        songId INTEGER PRIMARY KEY NOT NULL,
+                        trackName TEXT NOT NULL,
+                        artistName TEXT NOT NULL,
+                        syncedLyrics TEXT,
+                        plainLyrics TEXT,
+                        fetchedAt INTEGER NOT NULL
+                    )
+                """)
+            }
+        }
+        
         fun getDatabase(context: Context): MusicDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -36,7 +52,7 @@ abstract class MusicDatabase : RoomDatabase() {
                     MusicDatabase::class.java,
                     "euphoriae_database"
                 )
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
                 INSTANCE = instance
                 instance
@@ -44,3 +60,4 @@ abstract class MusicDatabase : RoomDatabase() {
         }
     }
 }
+

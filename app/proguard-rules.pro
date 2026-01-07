@@ -34,6 +34,7 @@
 
 -keep class com.oss.euphoriae.data.model.** { *; }
 -keep class com.oss.euphoriae.data.preferences.** { *; }
+-keep class com.oss.euphoriae.data.remote.** { *; }
 
 -dontwarn androidx.compose.**
 
@@ -57,4 +58,24 @@
     private void readObject(java.io.ObjectInputStream);
     java.lang.Object writeReplace();
     java.lang.Object readResolve();
+}
+
+# Ktor
+-keep class io.ktor.** { *; }
+-dontwarn io.ktor.**
+
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
+-keepclassmembers class kotlinx.serialization.json.** {
+    *** Companion;
+}
+-keepclasseswithmembers class kotlinx.serialization.json.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-keep,includedescriptorclasses class com.oss.euphoriae.**$$serializer { *; }
+-keepclassmembers class com.oss.euphoriae.** {
+    *** Companion;
+}
+-keepclasseswithmembers class com.oss.euphoriae.** {
+    kotlinx.serialization.KSerializer serializer(...);
 }

@@ -5,9 +5,11 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import com.oss.euphoriae.data.local.MusicDao
+import com.oss.euphoriae.data.model.CachedLyrics
 import com.oss.euphoriae.data.model.Playlist
 import com.oss.euphoriae.data.model.PlaylistSong
 import com.oss.euphoriae.data.model.Song
+import com.oss.euphoriae.data.remote.LrclibService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -17,6 +19,8 @@ class MusicRepository(
     private val context: Context,
     private val musicDao: MusicDao
 ) {
+    
+    private val lrclibService = LrclibService()
     
     fun getAllSongs(): Flow<List<Song>> = musicDao.getAllSongs()
     
@@ -181,6 +185,13 @@ class MusicRepository(
     
     suspend fun refreshLibrary(): Int = scanAndImportMusic()
     
+    /**
+     * Get lyrics for a song with fallback chain:
+     * 1. Local LRC file (same directory as song)
+     * 2. MediaStore LRC file
+     * 3. Cached lyrics from database
+     * 4. Fetch from LRCLIB API (and cache)
+     */
     fun getLyrics(song: Song): Flow<com.oss.euphoriae.data.model.Lyrics?> = kotlinx.coroutines.flow.flow {
         val lyrics = withContext(Dispatchers.IO) {
             // Strategy 1: Try direct file access (Legacy or same directory if allowed)
@@ -188,15 +199,12 @@ class MusicRepository(
             val lyricsFromFile = lrcFile?.let { com.oss.euphoriae.utils.LrcParser.parse(it) }
             
             if (lyricsFromFile != null) {
+                android.util.Log.d("MusicRepository", "Lyrics found from local file")
                 return@withContext lyricsFromFile
             }
             
             // Strategy 2: Try MediaStore (Scoped Storage friendly)
-            // Query for files with same display name but .lrc extension
             try {
-                val songName = song.title // Or file name without extension if possible
-                // Better to use the base of the display name if available, but we only have data path and title.
-                // Derive filename from data path
                 val songFileName = song.data.substringAfterLast('/')
                 val lrcFileName = songFileName.substringBeforeLast('.') + ".lrc"
                 
@@ -204,9 +212,6 @@ class MusicRepository(
                 val selection = "${MediaStore.Files.FileColumns.DISPLAY_NAME} = ?"
                 val selectionArgs = arrayOf(lrcFileName)
                 
-                // We need to query MediaStore.Files.EXTERNAL_CONTENT_URI (requires permissions on older Androids)
-                // On newer Androids, this query might fail or return nothing if we don't own the file.
-                // Catching exception is key.
                 val queryUri = MediaStore.Files.getContentUri("external")
                 
                 context.contentResolver.query(
@@ -221,18 +226,75 @@ class MusicRepository(
                         val id = cursor.getLong(idColumn)
                         val contentUri = ContentUris.withAppendedId(queryUri, id)
                         
-                        context.contentResolver.openInputStream(contentUri)?.use { inputStream ->
+                        val mediaStoreLyrics = context.contentResolver.openInputStream(contentUri)?.use { inputStream ->
                             com.oss.euphoriae.utils.LrcParser.parse(inputStream)
                         }
-                    } else {
-                        null
+                        
+                        if (mediaStoreLyrics != null) {
+                            android.util.Log.d("MusicRepository", "Lyrics found from MediaStore")
+                            return@withContext mediaStoreLyrics
+                        }
                     }
                 }
             } catch (e: Exception) {
                 android.util.Log.e("MusicRepository", "Failed to load lyrics from MediaStore", e)
-                null
             }
+            
+            // Strategy 3: Check cached lyrics from database
+            val cachedLyrics = musicDao.getCachedLyrics(song.id)
+            if (cachedLyrics != null) {
+                android.util.Log.d("MusicRepository", "Lyrics found from cache")
+                
+                // Prefer synced lyrics, fallback to plain
+                cachedLyrics.syncedLyrics?.let { synced ->
+                    com.oss.euphoriae.utils.LrcParser.parseString(synced)
+                }?.let { return@withContext it }
+                
+                cachedLyrics.plainLyrics?.let { plain ->
+                    com.oss.euphoriae.utils.LrcParser.parsePlainLyrics(plain)
+                }?.let { return@withContext it }
+            }
+            
+            // Strategy 4: Fetch from LRCLIB API
+            try {
+                android.util.Log.d("MusicRepository", "Fetching lyrics from LRCLIB: ${song.title} - ${song.artist}")
+                
+                val response = lrclibService.searchLyrics(
+                    trackName = song.title,
+                    artistName = song.artist,
+                    albumName = song.album,
+                    duration = song.duration
+                )
+                
+                if (response != null) {
+                    android.util.Log.d("MusicRepository", "Lyrics fetched from LRCLIB")
+                    
+                    // Cache the lyrics
+                    val cached = CachedLyrics(
+                        songId = song.id,
+                        trackName = song.title,
+                        artistName = song.artist,
+                        syncedLyrics = response.syncedLyrics,
+                        plainLyrics = response.plainLyrics
+                    )
+                    musicDao.insertCachedLyrics(cached)
+                    
+                    // Parse and return
+                    response.syncedLyrics?.let { synced ->
+                        com.oss.euphoriae.utils.LrcParser.parseString(synced)
+                    }?.let { return@withContext it }
+                    
+                    response.plainLyrics?.let { plain ->
+                        com.oss.euphoriae.utils.LrcParser.parsePlainLyrics(plain)
+                    }?.let { return@withContext it }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MusicRepository", "Failed to fetch lyrics from LRCLIB", e)
+            }
+            
+            null
         }
         emit(lyrics)
     }
 }
+
