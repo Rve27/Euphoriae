@@ -10,11 +10,8 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.Album
-import androidx.compose.material.icons.filled.PlaylistPlay
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -111,7 +108,7 @@ enum class Destination(
     HOME("home", "Home", Icons.Default.Home, "Home"),
     SONGS("songs", "Songs", Icons.Default.MusicNote, "Songs"),
     ALBUMS("albums", "Albums", Icons.Default.Album, "Albums"),
-    PLAYLISTS("playlists", "Playlists", Icons.Default.PlaylistPlay, "Playlists"),
+    PLAYLISTS("playlists", "Playlists", Icons.AutoMirrored.Default.PlaylistPlay, "Playlists"),
     EQUALIZER("equalizer", "Equalizer", Icons.Default.GraphicEq, "Equalizer")
 }
 

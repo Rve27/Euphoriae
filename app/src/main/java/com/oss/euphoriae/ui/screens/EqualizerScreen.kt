@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -507,7 +508,7 @@ fun EqualizerScreen(
                         audioEngine?.setLoudnessGain(it)
                     },
                     enabled = isEnabled,
-                    icon = Icons.Default.VolumeUp,
+                    icon = Icons.AutoMirrored.Default.VolumeUp,
                     valueLabel = "+${(loudnessGain * 10).toInt()} dB"
                 )
             }
@@ -1056,7 +1057,7 @@ fun EqualizerScreen(
                         audioEngine?.setChannelSeparation(it)
                     },
                     enabled = isEnabled,
-                    icon = Icons.Default.CallSplit,
+                    icon = Icons.AutoMirrored.Default.CallSplit,
                     description = "Stereo width"
                 )
             }
