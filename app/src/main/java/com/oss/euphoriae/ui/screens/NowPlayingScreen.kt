@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material3.*
@@ -376,7 +377,7 @@ fun NowPlayingScreen(
                     
                      IconButton(onClick = { showPlaylistDialog = true }) {
                         Icon(
-                            imageVector = Icons.Default.QueueMusic, // Queue music looks better for playlist/queue
+                            imageVector = Icons.AutoMirrored.Default.QueueMusic,
                             contentDescription = "Playlist",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(28.dp)
@@ -414,7 +415,7 @@ fun NowPlayingScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
-                            imageVector = Icons.Default.PlaylistPlay,
+                            imageVector = Icons.AutoMirrored.Default.PlaylistPlay,
                             contentDescription = null,
                             modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -443,7 +444,7 @@ fun NowPlayingScreen(
                                 },
                                 leadingContent = {
                                     Icon(
-                                        imageVector = Icons.Default.PlaylistPlay,
+                                        imageVector = Icons.AutoMirrored.Default.PlaylistPlay,
                                         contentDescription = null
                                     )
                                 },
