@@ -1062,31 +1062,6 @@ fun EqualizerScreen(
                 )
             }
             
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // ================== AUDIO INFO SECTION ==================
-            ExpandableSection(
-                title = "Audio Output Info",
-                subtitle = "Session & support status",
-                icon = Icons.Default.Info,
-                isExpanded = "info" in expandedSections,
-                onToggle = { toggleSection("info") }
-            ) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        InfoRow("Session ID", "${audioEffectsManager?.getAudioSessionId() ?: "N/A"}")
-                        InfoRow("Effects Status", if (isEnabled) "Active" else "Bypass")
-                        InfoRow("Reverb", if (audioEffectsManager?.isReverbSupported() == true) "✓ Supported" else "✗ Not Supported")
-                        InfoRow("Loudness Enhancer", if (audioEffectsManager?.isLoudnessEnhancerSupported() == true) "✓ Supported" else "✗ Not Supported")
-                        InfoRow("Profile", selectedProfile.displayName)
-                    }
-                }
-            }
-            
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
