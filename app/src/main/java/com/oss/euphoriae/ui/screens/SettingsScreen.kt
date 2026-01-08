@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -47,6 +48,7 @@ private val themeColors = listOf(
 @Composable
 fun SettingsScreen(
     onBackClick: () -> Unit,
+    onContributorsClick: () -> Unit,
     currentThemeColor: ThemeColorOption,
     onThemeColorChange: (ThemeColorOption) -> Unit,
     currentDarkMode: DarkModeOption,
@@ -159,6 +161,19 @@ fun SettingsScreen(
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            
+            ListItem(
+                headlineContent = { Text("Contributors") },
+                supportingContent = { Text("People who made this app") },
+                leadingContent = {
+                    Icon(
+                        imageVector = Icons.Default.People,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                modifier = Modifier.clickable(onClick = onContributorsClick)
             )
             
             ListItem(

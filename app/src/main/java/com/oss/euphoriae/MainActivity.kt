@@ -41,6 +41,7 @@ import com.oss.euphoriae.ui.screens.NowPlayingScreen
 import com.oss.euphoriae.ui.screens.PlaylistDetailScreen
 import com.oss.euphoriae.ui.screens.PlaylistScreen
 import com.oss.euphoriae.ui.screens.SettingsScreen
+import com.oss.euphoriae.ui.screens.ContributorsScreen
 import com.oss.euphoriae.ui.screens.SongsScreen
 import com.oss.euphoriae.ui.theme.EuphoriaeTheme
 import com.oss.euphoriae.ui.viewmodel.MusicViewModel
@@ -343,10 +344,16 @@ fun AppNavHost(
         composable("settings") {
             SettingsScreen(
                 onBackClick = { navController.popBackStack() },
+                onContributorsClick = { navController.navigate("contributors") },
                 currentThemeColor = currentThemeColor,
                 onThemeColorChange = onThemeColorChange,
                 currentDarkMode = currentDarkMode,
                 onDarkModeChange = onDarkModeChange
+            )
+        }
+        composable("contributors") {
+            ContributorsScreen(
+                onBackClick = { navController.popBackStack() }
             )
         }
     }
