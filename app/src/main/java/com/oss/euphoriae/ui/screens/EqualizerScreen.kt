@@ -1,7 +1,9 @@
 package com.oss.euphoriae.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
@@ -16,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -319,7 +322,21 @@ fun EqualizerScreen(
                     }
                     Switch(
                         checked = isEnabled,
-                        onCheckedChange = { isEnabled = it }
+                        onCheckedChange = { isEnabled = it },
+                        thumbContent = {
+                            Crossfade(
+                                targetState = isEnabled,
+                                animationSpec = tween(durationMillis = 500),
+                            ) { isChecked ->
+                                if (isChecked) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                                    )
+                                }
+                            }
+                        },
                     )
                 }
             }
@@ -697,7 +714,21 @@ fun EqualizerScreen(
                             audioPreferences?.setHeadphoneSurround(it)
                             audioEngine?.setHeadphoneSurround(it)
                         },
-                        enabled = isEnabled
+                        enabled = isEnabled,
+                        thumbContent = {
+                            Crossfade(
+                                targetState = headphoneSurround,
+                                animationSpec = tween(durationMillis = 500),
+                            ) { isChecked ->
+                                if (isChecked) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Check
+                                        contentDescription = null,
+                                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                                    )
+                                }
+                            }
+                        },
                     )
                 }
             }
