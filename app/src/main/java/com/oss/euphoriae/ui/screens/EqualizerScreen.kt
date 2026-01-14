@@ -7,6 +7,8 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -1220,8 +1222,16 @@ private fun ExpandableSection(
             
             AnimatedVisibility(
                 visible = isExpanded,
-                enter = expandVertically(),
-                exit = shrinkVertically()
+                enter = fadeIn(
+                    animationSpec = MaterialTheme.motionScheme.slowEffectsSpec()
+                ) + expandVertically(
+                    animationSpec = MaterialTheme.motionScheme.slowSpatialSpec()
+                ),
+                exit = fadeOut(
+                    animationSpec = MaterialTheme.motionScheme.slowEffectsSpec()
+                ) + shrinkVertically(
+                    animationSpec = MaterialTheme.motionScheme.slowSpatialSpec()
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
