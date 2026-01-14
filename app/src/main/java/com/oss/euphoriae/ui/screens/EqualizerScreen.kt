@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3ExpressiveApi::class)
+
 package com.oss.euphoriae.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
@@ -24,6 +26,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -63,7 +66,6 @@ private val presetConfigs = mapOf(
     "R&B" to listOf(0.5f, 0.4f, 0.2f, 0.1f, 0f, 0.2f, 0.3f, 0.2f, 0.1f, 0f)
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EqualizerScreen(
     audioEffectsManager: AudioEffectsManager? = null,
@@ -722,7 +724,7 @@ fun EqualizerScreen(
                             ) { isChecked ->
                                 if (isChecked) {
                                     Icon(
-                                        imageVector = Icons.Rounded.Check
+                                        imageVector = Icons.Rounded.Check,
                                         contentDescription = null,
                                         modifier = Modifier.size(SwitchDefaults.IconSize),
                                     )
@@ -1167,6 +1169,11 @@ private fun ExpandableSection(
     onToggle: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val rotateArrow by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        animationSpec = MaterialTheme.motionScheme.slowSpatialSpec()
+    )
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -1204,9 +1211,10 @@ private fun ExpandableSection(
                     }
                 }
                 Icon(
-                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    imageVector = Icons.Default.ExpandMore,
                     contentDescription = if (isExpanded) "Collapse" else "Expand",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.rotate(rotateArrow)
                 )
             }
             
