@@ -42,7 +42,10 @@ class NativeRenderersFactory(
     }
 
     init {
-        setExtensionRendererMode(EXTENSION_RENDERER_MODE_PREFER)
+        // Do NOT use EXTENSION_RENDERER_MODE_PREFER here.
+        // Extension renderers FFmpeg can produce audio in formats or
+        // at frame sizes that are incompatible with our NativeAudioProcessor
+        // pipeline, introducing static / glitches regardless of EQ state.
         Log.i(TAG, "NativeRenderersFactory created")
     }
 

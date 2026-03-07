@@ -22,7 +22,6 @@ import androidx.media3.common.C
 import androidx.media3.common.audio.AudioProcessor
 import androidx.media3.common.util.UnstableApi
 import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
 /**
  * NativeAudioProcessor - ExoPlayer AudioProcessor that uses native effects
@@ -50,7 +49,15 @@ class NativeAudioProcessor(private val audioEngine: AudioEngine) : AudioProcesso
         Log.i(TAG, "Configure called: sampleRate=${inputAudioFormat.sampleRate}, " +
                 "channels=${inputAudioFormat.channelCount}, " +
                 "encoding=${inputAudioFormat.encoding}")
-        
+
+        // Reset both formats first so that isActive() correctly returns false
+        // if we bail out early due to an unsupported encoding.  Previously
+        // only the early-return path skipped the assignment, leaving a stale
+        // inputAudioFormat that made isActive() return true even though the
+        // processor could not handle the new format – causing garbled output.
+        this.inputAudioFormat = AudioProcessor.AudioFormat.NOT_SET
+        this.outputAudioFormat = AudioProcessor.AudioFormat.NOT_SET
+
         // We only support PCM 16-bit or Float
         if (inputAudioFormat.encoding != C.ENCODING_PCM_16BIT && 
             inputAudioFormat.encoding != C.ENCODING_PCM_FLOAT) {
@@ -103,8 +110,10 @@ class NativeAudioProcessor(private val audioEngine: AudioEngine) : AudioProcesso
             floatBuffer = FloatArray(sampleCount)
         }
         
-        // Convert Int16 to Float
-        val shortBuffer = input.order(ByteOrder.LITTLE_ENDIAN).asShortBuffer()
+        // Convert Int16 to Float using the buffer's own byte order so we don't
+        // accidentally re-interpret bytes on devices where input.order() is not
+        // LITTLE_ENDIAN.
+        val shortBuffer = input.asShortBuffer()
         for (i in 0 until sampleCount) {
             floatBuffer[i] = shortBuffer.get(i) / 32768f
         }
@@ -112,10 +121,10 @@ class NativeAudioProcessor(private val audioEngine: AudioEngine) : AudioProcesso
         // Process with native engine
         audioEngine.processAudio(floatBuffer, numFrames, channelCount)
         
-        // Prepare output buffer
-        if (outputBuffer.capacity() < input.remaining()) {
-            outputBuffer = ByteBuffer.allocateDirect(input.remaining())
-                .order(ByteOrder.LITTLE_ENDIAN)
+        // Prepare output buffer (allocate fresh when needed)
+        if (outputBuffer === AudioProcessor.EMPTY_BUFFER || outputBuffer.capacity() < sampleCount * 2) {
+            outputBuffer = ByteBuffer.allocateDirect(sampleCount * 2)
+                .order(input.order())
         }
         outputBuffer.clear()
         
@@ -129,7 +138,7 @@ class NativeAudioProcessor(private val audioEngine: AudioEngine) : AudioProcesso
         outputBuffer.position(0)
         outputBuffer.limit(sampleCount * 2)
         
-        // Clear input
+        // Mark input as fully consumed
         input.position(input.limit())
     }
 
@@ -142,17 +151,17 @@ class NativeAudioProcessor(private val audioEngine: AudioEngine) : AudioProcesso
             floatBuffer = FloatArray(sampleCount)
         }
         
-        // Copy to float array
-        val floatInput = input.order(ByteOrder.LITTLE_ENDIAN).asFloatBuffer()
+        // Copy floats from input using the buffer's own byte order
+        val floatInput = input.asFloatBuffer()
         floatInput.get(floatBuffer, 0, sampleCount)
         
         // Process with native engine
         audioEngine.processAudio(floatBuffer, numFrames, channelCount)
         
-        // Prepare output buffer
-        if (outputBuffer.capacity() < input.remaining()) {
-            outputBuffer = ByteBuffer.allocateDirect(input.remaining())
-                .order(ByteOrder.LITTLE_ENDIAN)
+        // Prepare output buffer (allocate fresh when needed)
+        if (outputBuffer === AudioProcessor.EMPTY_BUFFER || outputBuffer.capacity() < sampleCount * 4) {
+            outputBuffer = ByteBuffer.allocateDirect(sampleCount * 4)
+                .order(input.order())
         }
         outputBuffer.clear()
         
@@ -163,7 +172,7 @@ class NativeAudioProcessor(private val audioEngine: AudioEngine) : AudioProcesso
         outputBuffer.position(0)
         outputBuffer.limit(sampleCount * 4)
         
-        // Clear input
+        // Mark input as fully consumed
         input.position(input.limit())
     }
 
