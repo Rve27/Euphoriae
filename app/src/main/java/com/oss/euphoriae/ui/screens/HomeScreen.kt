@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+
 package com.oss.euphoriae.ui.screens
 
 import android.Manifest
@@ -27,17 +29,22 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,8 +61,9 @@ import com.oss.euphoriae.data.model.Song
 import com.oss.euphoriae.ui.components.SimpleTopAppBar
 import com.oss.euphoriae.ui.components.PlaylistCardCompact
 import com.oss.euphoriae.ui.components.SongListItem
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     songs: List<Song>,
@@ -67,20 +75,20 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    
-    // Permission handling for audio
+    val coroutineScope = rememberCoroutineScope()
+
     val audioPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         Manifest.permission.READ_MEDIA_AUDIO
     } else {
         Manifest.permission.READ_EXTERNAL_STORAGE
     }
-    
+
     var hasPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context, audioPermission) == PackageManager.PERMISSION_GRANTED
         )
     }
-    
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -89,6 +97,21 @@ fun HomeScreen(
             onScanClick()
         }
     }
+
+    var isRefreshing by remember { mutableStateOf(false) }
+    val onRefresh: () -> Unit = {
+        isRefreshing = true
+        coroutineScope.launch {
+            delay(3000)
+            if (hasPermission) {
+                onScanClick()
+            } else {
+                permissionLauncher.launch(audioPermission)
+            }
+            isRefreshing = false
+        }
+    }
+    val state = rememberPullToRefreshState()
     
     // Request notification permission on Android 13+
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
@@ -130,94 +153,104 @@ fun HomeScreen(
             )
         }
     ) { innerPadding ->
-        if (songs.isEmpty() && !isScanning) {
-            // Empty state - prompt to scan
-            EmptyMusicState(
-                hasPermission = hasPermission,
-                onScanClick = {
-                    if (hasPermission) {
-                        onScanClick()
-                    } else {
-                        permissionLauncher.launch(audioPermission)
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            )
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentPadding = PaddingValues(bottom = 100.dp)
-            ) {
-                // Recently Added Section
-                if (songs.isNotEmpty()) {
-                    item {
-                        SectionHeader(title = "Recently Added")
-                    }
-                    
-                    item {
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            contentPadding = PaddingValues(horizontal = 16.dp)
-                        ) {
-                            val recentlyAdded = songs.take(6)
-                            items(
-                                items = recentlyAdded,
-                                key = { song -> song.id }
-                            ) { song ->
-                                SongCard(
-                                    song = song,
-                                    onClick = { onSongClick(song, recentlyAdded) }
-                                )
+        PullToRefreshBox(
+            modifier = Modifier.padding(innerPadding),
+            state = state,
+            isRefreshing = isRefreshing,
+            onRefresh = onRefresh,
+            indicator = {
+                PullToRefreshDefaults.LoadingIndicator(
+                    state = state,
+                    isRefreshing = isRefreshing,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
+            },
+        ) {
+            if (songs.isEmpty() && !isScanning) {
+                // Empty state - prompt to scan
+                EmptyMusicState(
+                    hasPermission = hasPermission,
+                    onScanClick = {
+                        if (hasPermission) {
+                            onScanClick()
+                        } else {
+                            permissionLauncher.launch(audioPermission)
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 100.dp)
+                ) {
+                    // Recently Added Section
+                    if (songs.isNotEmpty()) {
+                        item {
+                            SectionHeader(title = "Recently Added")
+                        }
+
+                        item {
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                contentPadding = PaddingValues(horizontal = 16.dp)
+                            ) {
+                                val recentlyAdded = songs.take(6)
+                                items(
+                                    items = recentlyAdded,
+                                    key = { song -> song.id }
+                                ) { song ->
+                                    SongCard(
+                                        song = song,
+                                        onClick = { onSongClick(song, recentlyAdded) }
+                                    )
+                                }
                             }
                         }
+
+                        item { Spacer(modifier = Modifier.height(24.dp)) }
                     }
-                    
-                    item { Spacer(modifier = Modifier.height(24.dp)) }
-                }
-                
-                // Your Playlists
-                if (playlists.isNotEmpty()) {
-                    item {
-                        SectionHeader(title = "Your Playlists")
-                    }
-                    
-                    item {
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            contentPadding = PaddingValues(horizontal = 16.dp)
-                        ) {
-                            items(playlists) { playlist ->
-                                PlaylistCardCompact(
-                                    playlist = playlist,
-                                    onClick = { }
-                                )
+
+                    // Your Playlists
+                    if (playlists.isNotEmpty()) {
+                        item {
+                            SectionHeader(title = "Your Playlists")
+                        }
+
+                        item {
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                contentPadding = PaddingValues(horizontal = 16.dp)
+                            ) {
+                                items(playlists) { playlist ->
+                                    PlaylistCardCompact(
+                                        playlist = playlist,
+                                        onClick = { }
+                                    )
+                                }
                             }
                         }
+
+                        item { Spacer(modifier = Modifier.height(24.dp)) }
                     }
-                    
-                    item { Spacer(modifier = Modifier.height(24.dp)) }
-                }
-                
-                // All Songs
-                if (songs.isNotEmpty()) {
-                    item {
-                        SectionHeader(title = "All Songs (${songs.size})")
-                    }
-                    
-                    val allSongsPreview = songs.take(10)
-                    items(
-                        items = allSongsPreview,
-                        key = { song -> song.id }
-                    ) { song ->
-                        SongListItem(
-                            song = song,
-                            onClick = { onSongClick(song, allSongsPreview) },
-                            modifier = Modifier.padding(horizontal = 8.dp)
-                        )
+
+                    // All Songs
+                    if (songs.isNotEmpty()) {
+                        item {
+                            SectionHeader(title = "All Songs (${songs.size})")
+                        }
+
+                        val allSongsPreview = songs.take(10)
+                        items(
+                            items = allSongsPreview,
+                            key = { song -> song.id }
+                        ) { song ->
+                            SongListItem(
+                                song = song,
+                                onClick = { onSongClick(song, allSongsPreview) },
+                                modifier = Modifier.padding(horizontal = 8.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -362,4 +395,3 @@ private fun SectionHeader(
         modifier = modifier.padding(horizontal = 16.dp, vertical = 12.dp)
     )
 }
-
