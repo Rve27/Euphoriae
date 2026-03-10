@@ -221,7 +221,7 @@ fun EuphoriaeMainApp(
                     }
                 }
             }
-        ) { contentPadding ->
+        ) {
             AppNavHost(
                 navController = navController,
                 startDestination = startDestination,
@@ -246,7 +246,6 @@ fun EuphoriaeMainApp(
                 onDarkModeChange = { option ->
                     themePreferences.setDarkMode(option)
                 },
-                modifier = Modifier.padding(contentPadding)
             )
         }
     }
