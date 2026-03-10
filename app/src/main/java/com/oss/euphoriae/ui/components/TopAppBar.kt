@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 @Composable
 fun SimpleTopAppBar(
     title: @Composable (() -> Unit),
+    tooltipText: String,
     actionIcon: @Composable (() -> Unit),
     onActionClick: () -> Unit
 ) {
@@ -29,7 +30,7 @@ fun SimpleTopAppBar(
                     TooltipDefaults.rememberTooltipPositionProvider(
                         TooltipAnchorPosition.Start
                     ),
-                tooltip = { PlainTooltip { Text("Settings") } },
+                tooltip = { PlainTooltip { Text(tooltipText) } },
                 state = rememberTooltipState(),
             ) {
                 IconButton(

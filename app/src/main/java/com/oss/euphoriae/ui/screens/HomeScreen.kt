@@ -143,6 +143,7 @@ fun HomeScreen(
                         overflow = TextOverflow.Ellipsis
                     )
                 },
+                tooltipText = "Settings",
                 actionIcon = {
                     Icon(
                         imageVector = Icons.Filled.Settings,
